@@ -35,14 +35,7 @@ En `../domains/<modulo>.md`:
 - [ ] Tests para service con mock-repo si hay lógica de negocio compleja
 - [ ] `pnpm test` pasa sin regresiones
 
-### 5. Contexto de feature
-
-En `CLAUDE.worktree.md`:
-- [ ] `## Estado` → marcar `Completa — pendiente PR`
-- [ ] `## Donde quede` → vaciar o poner "DONE"
-- [ ] `## Decisiones tomadas` → completar con decisiones de esta sesión
-
-### 6. Memoria
+### 5. Memoria
 
 En `.claude/memory/session.md`:
 - [ ] Actualizar `## Lo que se hizo en esta sesión`

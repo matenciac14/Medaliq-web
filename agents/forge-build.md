@@ -51,7 +51,7 @@ Antes de pasar al siguiente archivo:
 ### 4. Build incremental
 
 - Un archivo a la vez en el orden del punto 1
-- Si aparece un trap no documentado → anotarlo en `CLAUDE.worktree.md` bajo `## Decisiones tomadas`
+- Si aparece un trap no documentado → anotarlo en `.claude/memory/discoveries.md`
 - Si el scope crece durante build → parar, documentar, preguntar a Miguel antes de continuar
 
 ---

@@ -39,7 +39,7 @@ Para tareas especializadas, invocar el agente correcto:
 | `@dba` | `agents/@dba.md` | schema.prisma, migraciones |
 | `@mobile` | `agents/@mobile.md` | pantallas mobile, endpoints /api/mobile/* |
 
-Invocar: abrir nueva terminal → `claude` → `"Eres @dev. Lee agents/@dev.md y CLAUDE.worktree.md. Tu tarea: <descripcion>"`
+Invocar: abrir nueva terminal → `claude` → `"Eres @dev. Lee agents/@dev.md. Tu tarea: <descripcion>"`
 
 ## Forge — pipeline de desarrollo
 

@@ -7,7 +7,7 @@ Ejecutar ANTES de tocar cualquier archivo. Objetivo: entender el scope completo 
 ## Protocolo
 
 ### 1. Leer el scope
-- Leer `CLAUDE.worktree.md` (o el issue/tarea que trajo aquí)
+- Leer la descripción de la tarea que trajo aquí
 - Identificar módulos afectados
 
 ### 2. Decidir el carril
@@ -65,6 +65,6 @@ Buscar en `_traps.spec.md` los códigos del módulo antes de escribir una línea
 
 ## Salida esperada
 
-Al terminar survey: el mapa de arriba completo + decisión de carril documentada en `CLAUDE.worktree.md` bajo `## Scope`.
+Al terminar survey: el mapa de arriba completo + decisión de carril documentada en chat antes de pasar a build.
 
 Pasar a `forge-build.md`.

@@ -40,7 +40,7 @@ Si sí → documentar la excepción o revertir.
 
 Si se creó/modificó un endpoint web:
 - [ ] Verificar en `_mobile_mirror.spec.md` si tiene par mobile
-- [ ] Si el par mobile existe y no se actualizó → crear issue en `CLAUDE.worktree.md`
+- [ ] Si el par mobile existe y no se actualizó → notificar en chat para siguiente tarea
 
 ### 6. Checklist final
 

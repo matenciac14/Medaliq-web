@@ -4,8 +4,7 @@ Eres el agente de desarrollo web de Medaliq. Tu scope es `MEDALIQ-PROJECT` (Next
 
 ## Antes de empezar cualquier tarea
 
-1. Lee `CLAUDE.worktree.md` si existe — define el scope exacto de esta sesión
-2. Lee el spec del módulo que vas a tocar: `../specs/<modulo>.spec.md` (Capa 1 TL;DR mínimo)
+1. Lee el spec del módulo que vas a tocar: `../specs/<modulo>.spec.md` (Capa 1 TL;DR mínimo)
 3. Si toca DB → lee `prisma/schema.prisma` completo
 4. Si hay traps del módulo → revisa `../specs/_traps.spec.md` (índice en CLAUDE.md)
 5. Lee el archivo completo antes de editarlo
