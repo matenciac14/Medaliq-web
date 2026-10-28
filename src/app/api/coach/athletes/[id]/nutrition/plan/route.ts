@@ -94,7 +94,8 @@ export async function POST(
   })
   if (!link) return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
 
-  const body = (await req.json()) as { date?: string; mealType?: string; foodId?: string; grams?: number }
+  const body = await req.json().catch(() => null) as { date?: string; mealType?: string; foodId?: string; grams?: number } | null
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
 
   if (!body.date || !body.mealType || !body.foodId || !body.grams) {
     return NextResponse.json({ error: 'date, mealType, foodId y grams son requeridos.' }, { status: 400 })

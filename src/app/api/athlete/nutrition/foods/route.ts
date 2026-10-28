@@ -7,7 +7,7 @@ import { rateLimitAsync } from '@/lib/rate_limit'
 export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  if (!session.user.features?.nutrition) {
+  if (session.user.role !== 'COACH' && !session.user.features?.nutrition) {
     return NextResponse.json({ error: 'Función no disponible en tu plan actual.', upgrade: '/upgrade' }, { status: 402 })
   }
   const { allowed } = await rateLimitAsync(`web-${session.user.id}:nutrition-foods`, { limit: 300, windowMs: 60_000 })

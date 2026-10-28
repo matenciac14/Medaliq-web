@@ -54,10 +54,11 @@ export async function PATCH(
 
   const existing = await prisma.exercise.findUnique({ where: { id }, select: { coachId: true } })
   if (!existing || existing.coachId !== session.user.id) {
-    return NextResponse.json({ error: 'Solo puedes editar tus ejercicios custom' }, { status: 404 })
+    return NextResponse.json({ error: 'Solo puedes editar tus ejercicios custom' }, { status: 403 })
   }
 
-  const body = await req.json()
+  const body = await req.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   const { name, bodyPart, target, equipment, description, gifUrl } = body
 
   const errors = validateExercise({ name, bodyPart, target, equipment, description })
@@ -92,7 +93,7 @@ export async function DELETE(
 
   const existing = await prisma.exercise.findUnique({ where: { id }, select: { coachId: true } })
   if (!existing || existing.coachId !== session.user.id) {
-    return NextResponse.json({ error: 'Solo puedes eliminar tus ejercicios custom' }, { status: 404 })
+    return NextResponse.json({ error: 'Solo puedes eliminar tus ejercicios custom' }, { status: 403 })
   }
 
   const usageCount = await prisma.workoutExercise.count({ where: { exerciseId: id } })

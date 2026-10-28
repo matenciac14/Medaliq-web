@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
 
   const secret = new TextEncoder().encode(process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)
   let userId: string
+  let pwFingerprint: string | undefined
 
   try {
     const { payload } = await jwtVerify(token, secret)
@@ -31,15 +32,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Token inválido.' }, { status: 400 })
     }
     userId = payload.sub
+    pwFingerprint = typeof payload.pwf === 'string' ? payload.pwf : undefined
   } catch {
-    return NextResponse.json({ error: 'El link expiró o no es válido. Pide a tu coach un nuevo link.' }, { status: 400 })
+    return NextResponse.json({ error: 'El link expiró o no es válido. Solicita un nuevo link.' }, { status: 400 })
   }
 
   const hashed = await bcrypt.hash(newPassword, 12)
-  await prisma.user.update({
-    where: { id: userId },
-    data: { password: hashed },
-  })
+
+  // Atomic update: verify fingerprint + update password in a single operation (prevents TOCTOU race)
+  if (pwFingerprint) {
+    const result = await prisma.user.updateMany({
+      where: { id: userId, password: { endsWith: pwFingerprint } },
+      data: { password: hashed },
+    })
+    if (result.count === 0) {
+      return NextResponse.json({ error: 'Este link ya fue usado. Solicita un nuevo link.' }, { status: 400 })
+    }
+  } else {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }

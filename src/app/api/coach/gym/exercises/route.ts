@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
 
   const coachId = session.user.id
 
-  const body = await req.json()
+  const body = await req.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   const { name, bodyPart, target, equipment, description, gifUrl } = body
 
   // EX-24: usar validateExercise() del dominio (incluye límite de 120 chars en nombre)

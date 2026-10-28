@@ -49,5 +49,10 @@ export async function GET(req: NextRequest) {
     body: JSON.stringify(event),
   })
 
-  return NextResponse.redirect(successUrl)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const parsedSuccess = new URL(successUrl, appUrl)
+  if (parsedSuccess.origin !== new URL(appUrl).origin) {
+    return NextResponse.json({ error: 'successUrl inválido.' }, { status: 400 })
+  }
+  return NextResponse.redirect(parsedSuccess.toString())
 }

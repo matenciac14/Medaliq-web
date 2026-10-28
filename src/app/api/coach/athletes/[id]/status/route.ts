@@ -26,7 +26,8 @@ export async function PATCH(
   if (!allowed) return NextResponse.json({ error: 'Demasiadas solicitudes' }, { status: 429 })
 
   const { id: athleteId } = await params
-  const { status } = await req.json() as { status: 'ACTIVE' | 'PAUSED' }
+  const body = await req.json().catch(() => null)
+  const status = (body as { status?: string } | null)?.status
 
   if (status !== 'ACTIVE' && status !== 'PAUSED') {
     return NextResponse.json({ error: 'Status inválido' }, { status: 400 })

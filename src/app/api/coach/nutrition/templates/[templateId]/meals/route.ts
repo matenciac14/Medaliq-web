@@ -86,7 +86,7 @@ export async function POST(
         kcal, proteinG, carbsG, fatG,
         order: existingCount,
       },
-      include: { food: { select: { id: true, name: true, category: true } } },
+      include: { food: { select: { id: true, name: true, category: true, servingG: true, servingLabel: true } } },
     })
   })
 

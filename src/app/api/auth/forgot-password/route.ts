@@ -22,12 +22,14 @@ export async function POST(req: NextRequest) {
   // Always return 200 to avoid email enumeration
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, email: true },
+    select: { id: true, email: true, password: true },
   })
 
   if (user) {
     const secret = new TextEncoder().encode(process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)
-    const token = await new SignJWT({ purpose: 'set-password' })
+    // Include password hash fingerprint to prevent token reuse after password change
+    const pwFingerprint = (user.password ?? '').slice(-10)
+    const token = await new SignJWT({ purpose: 'set-password', pwf: pwFingerprint })
       .setProtectedHeader({ alg: 'HS256' })
       .setSubject(user.id)
       .setExpirationTime('1h')
