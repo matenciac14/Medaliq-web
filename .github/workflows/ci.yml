@@ -1,0 +1,32 @@
+name: CI — typecheck + tests
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Generar Prisma client
+        run: pnpm prisma generate
+
+      - name: TypeScript
+        run: pnpm typecheck
+
+      - name: Tests unitarios
+        run: pnpm test
