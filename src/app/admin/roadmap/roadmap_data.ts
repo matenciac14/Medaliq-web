@@ -3902,7 +3902,7 @@ export const GROUPS: RoadmapGroup[] = [
         items: [
           { title: 'Activar Wompi en producción + enforcement de tiers (feature gates)', done: false, priority: 'P0', note: 'Implementación ya lista. Comunicar a coaches beta.' },
           { title: 'Founding member: 50% off 6 meses (Growth $29.50, Pro $69.50)', done: false, priority: 'P0', note: 'Primeros 20 coaches de beta.' },
-          { title: 'Programa referidos: coach refiere coach → ambos 1 mes gratis', done: false, priority: 'P1', note: 'Tracking via código único (/join/[code]). Email automático al referido.' },
+          { title: 'Programa referidos: coach refiere coach → ambos 1 mes gratis', done: true, priority: 'P1', note: 'DONE (2026-10-28). CoachReferral model (REF-XXXXXX, 90d expiry, 30 creditDays). Domain use cases + GET/POST /api/coach/referral + optional referralCode en register + UI en /coach/profile.' },
           { title: 'Content marketing: blog 2/sem + Instagram 3-5/sem + YouTube 1/sem', done: false, priority: 'P1', note: 'Temas: dejar Excel/WhatsApp, señales abandono atleta, cuánto cobrar como coach, negocio coaching online.' },
           { title: 'Partnerships: FCA, Liga Atletismo Antioquia, universidades deportivas', done: false, priority: 'P2', note: 'Iniciar conversaciones. Piloto con coaches de la liga.' },
           { title: 'Meta: 50 coaches pagos, $5K MRR, churn <5%', done: false, priority: 'P0', note: '' },
