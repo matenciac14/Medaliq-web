@@ -55,7 +55,7 @@ describe('Admin Disciplines API', () => {
 
   describe('POST /api/admin/disciplines', () => {
     it('returns 403 for non-admin', async () => {
-      vi.mocked(auth).mockResolvedValue(null)
+      vi.mocked(auth).mockResolvedValue(null as any)
 
       const req = new Request('http://localhost/api/admin/disciplines', {
         method: 'POST',
