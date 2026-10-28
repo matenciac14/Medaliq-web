@@ -40,4 +40,26 @@ if ! pnpm tsc --noEmit 2>/dev/null; then
 fi
 echo "  ✓ TypeScript OK"
 
+# ── Tests unitarios ───────────────────────────────────────────────────────────
+echo "  → Corriendo tests unitarios..."
+if ! pnpm vitest run 2>/dev/null; then
+  echo ""
+  echo "  ✗ Tests fallando — push bloqueado."
+  echo "    Corre 'pnpm vitest run' para ver el detalle."
+  echo ""
+  exit 1
+fi
+echo "  ✓ Tests OK"
+
+# ── Build de producción ───────────────────────────────────────────────────────
+echo "  → Verificando build de producción..."
+if ! npx next build 2>/dev/null; then
+  echo ""
+  echo "  ✗ Build roto — push bloqueado."
+  echo "    Corre 'npx next build' para ver el detalle."
+  echo ""
+  exit 1
+fi
+echo "  ✓ Build OK"
+
 exit 0
