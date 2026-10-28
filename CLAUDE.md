@@ -41,6 +41,19 @@ Para tareas especializadas, invocar el agente correcto:
 
 Invocar: abrir nueva terminal → `claude` → `"Eres @dev. Lee agents/@dev.md y CLAUDE.worktree.md. Tu tarea: <descripcion>"`
 
+## Forge — pipeline de desarrollo
+
+Usar para cualquier feature que no sea un fix de 1 archivo:
+
+| Fase | Archivo | Qué hace |
+|------|---------|---------|
+| 1 — Survey | `agents/forge-survey.md` | Mapea scope, lee specs y traps, define carril |
+| 2 — Build | `agents/forge-build.md` | Implementa en orden: DB → domain → infra → API → UI → mobile → tests |
+| 3 — Inspect | `agents/forge-inspect.md` | Audita seguridad, traps, build, mirror mobile |
+| 4 — Seal | `agents/forge-seal.md` | Roadmap + spec + domain doc + tests + memoria + PR |
+
+Arrancar con: `"Lee agents/forge-survey.md. La tarea es: <descripcion>"`
+
 ---
 
 ## SDD — Spec-Driven Development
