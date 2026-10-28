@@ -10,6 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "verify": "tsc --noEmit && vitest run && next build",
     "postinstall": "prisma generate",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
