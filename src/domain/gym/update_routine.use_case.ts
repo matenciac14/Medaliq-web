@@ -106,6 +106,17 @@ export async function updateRoutineUseCase(
         const validExs = day.exercises.filter((e) => e.exerciseId)
 
         // Phase 1: create exercises, collect order -> id
+        // Ensure unique orders — if duplicates exist, re-index
+        const seenOrders = new Set<number>()
+        for (const ex of validExs) {
+          const o = ex.order ?? 0
+          if (seenOrders.has(o)) {
+            // Re-index all exercises sequentially
+            validExs.forEach((e, idx) => { e.order = idx })
+            break
+          }
+          seenOrders.add(o)
+        }
         const orderToId = new Map<number, string>()
         for (let j = 0; j < validExs.length; j++) {
           const ex = validExs[j]

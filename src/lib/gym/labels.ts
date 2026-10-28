@@ -34,6 +34,25 @@ export const TARGET_LABELS: Record<string, string> = {
   'upper back':        'Espalda alta',
 }
 
+export const EQUIPMENT_LABELS: Record<string, string> = {
+  barbell:          'Barra',
+  dumbbell:         'Mancuerna',
+  cable:            'Cable',
+  'body weight':    'Peso corporal',
+  machine:          'Máquina',
+  band:             'Banda',
+  kettlebell:       'Kettlebell',
+  ez_barbell:       'Barra EZ',
+  smith_machine:    'Smith',
+  leverage_machine: 'Máquina leverage',
+  other:            'Otro',
+}
+
+export const MECHANIC_LABELS: Record<string, string> = {
+  compound:  'Compuesto',
+  isolation: 'Aislamiento',
+}
+
 /** Compat — WorkoutDay.muscleGroups sigue usando strings UPPERCASE (ej. 'CHEST', 'BACK'). */
 const LEGACY_MUSCLE_LABELS: Record<string, string> = {
   CHEST:       'Pecho',

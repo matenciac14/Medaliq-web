@@ -17,6 +17,7 @@ export interface UpdateCoachProfileInput {
   avatarUrl?: string
   identification?: string
   phoneWa?: string
+  showPhoneWa?: boolean
 }
 
 // ── Use case ─────────────────────────────────────────────────────────────────
@@ -29,7 +30,7 @@ export async function updateCoachProfileUseCase(
   const {
     slug, bio, headline, city, country, whatsapp, instagram,
     yearsExp, specialties, certifications, isPublic, avatarUrl,
-    identification, phoneWa,
+    identification, phoneWa, showPhoneWa,
   } = input
 
   // Validate slug
@@ -40,13 +41,13 @@ export async function updateCoachProfileUseCase(
   // Validate identification
   if (identification !== undefined) {
     const trimmed = (identification ?? '').trim()
-    if (trimmed.length < 5 || trimmed.length > 30) {
+    if (trimmed.length > 0 && (trimmed.length < 5 || trimmed.length > 30)) {
       throw { status: 400, message: 'La identificación debe tener entre 5 y 30 caracteres.' }
     }
   }
 
   // Validate phoneWa
-  if (phoneWa !== undefined && !/^\+[1-9]\d{7,14}$/.test(phoneWa ?? '')) {
+  if (phoneWa !== undefined && phoneWa !== null && phoneWa !== '' && !/^\+[1-9]\d{7,14}$/.test(phoneWa)) {
     throw { status: 400, message: 'El número de WhatsApp debe estar en formato internacional (ej: +573001234567).' }
   }
 
@@ -61,7 +62,7 @@ export async function updateCoachProfileUseCase(
           select: { id: true },
         })
       : Promise.resolve(null),
-    phoneWa !== undefined
+    phoneWa !== undefined && phoneWa !== null && phoneWa !== ''
       ? db.user.findFirst({
           where: { phoneWa, role: 'COACH', NOT: { id: coachId } },
           select: { id: true },
@@ -80,12 +81,13 @@ export async function updateCoachProfileUseCase(
   }
 
   // Persist identification + phoneWa in User
-  if (identification !== undefined || phoneWa !== undefined) {
+  if (identification !== undefined || phoneWa !== undefined || showPhoneWa !== undefined) {
     await db.user.update({
       where: { id: coachId },
       data: {
         ...(identification !== undefined && { identification: identification.trim() }),
         ...(phoneWa !== undefined && { phoneWa }),
+        ...(showPhoneWa !== undefined && { showPhoneWa }),
       },
     })
   }
