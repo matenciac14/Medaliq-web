@@ -180,9 +180,10 @@ function sessionIntensity(type: string): string {
   return 'REST'
 }
 
-function dayDate(weekStartDate: string, dayOfWeek: number): Date {
+// dayIdx: base-0 (0=Lun, 6=Dom)
+function dayDate(weekStartDate: string, dayIdx: number): Date {
   const d = new Date(weekStartDate)
-  d.setDate(d.getDate() + dayOfWeek)
+  d.setDate(d.getDate() + dayIdx)
   return d
 }
 
@@ -337,7 +338,7 @@ export default function PlanBuilderClient({ athleteId, athleteName, initialPlan,
   }
 
   function openEditModal(session: BuilderSession, weekId: string) {
-    setModal({ weekId, dayOfWeek: session.dayOfWeek, session })
+    setModal({ weekId, dayOfWeek: session.dayOfWeek - 1, session })
   }
 
   async function handleSaveSession(data: {
@@ -382,7 +383,7 @@ export default function PlanBuilderClient({ athleteId, athleteName, initialPlan,
         const res = await fetch(`/api/coach/plan/${plan.id}/sessions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ weekId: modal.weekId, dayOfWeek: modal.dayOfWeek, ...data }),
+          body: JSON.stringify({ weekId: modal.weekId, dayOfWeek: modal.dayOfWeek + 1, ...data }),
         })
         if (!res.ok) throw new Error('Error creando sesión')
         const { session: created } = await res.json()
@@ -776,7 +777,13 @@ export default function PlanBuilderClient({ athleteId, athleteName, initialPlan,
             ).map((st) => (
               <button
                 key={st.type}
-                onClick={() => week && openAddModal(week.id, 0, st.type)}
+                onClick={() => {
+                  if (!week) return
+                  const usedDays = new Set(week.sessions.map(s => s.dayOfWeek))
+                  if (usedDays.size >= 7) return
+                  const firstEmpty = [1, 2, 3, 4, 5, 6, 7].find(d => !usedDays.has(d))!
+                  openAddModal(week.id, firstEmpty - 1, st.type)
+                }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left group"
               >
                 <span
@@ -899,7 +906,7 @@ export default function PlanBuilderClient({ athleteId, athleteName, initialPlan,
               )}
             </div>
             <div className="flex items-center gap-2">
-              {weekIdx > 0 && (
+              {weekIdx > 0 && (plan.weeks[weekIdx - 1]?.sessions?.length ?? 0) > 0 && (
                 <button
                   onClick={handleCopyPrevWeek}
                   disabled={saving}
@@ -993,7 +1000,7 @@ export default function PlanBuilderClient({ athleteId, athleteName, initialPlan,
           {/* 7-day grid */}
           <div className="grid grid-cols-7 gap-2">
             {DAY_NAMES.map((dayName, dayIdx) => {
-              const sessions = week!.sessions.filter((s) => s.dayOfWeek === dayIdx)
+              const sessions = week!.sessions.filter((s) => s.dayOfWeek === dayIdx + 1)
               const date = dayDate(week!.startDate, dayIdx)
               return (
                 <div key={dayIdx} className="min-h-[260px] flex flex-col">
@@ -1115,7 +1122,7 @@ export default function PlanBuilderClient({ athleteId, athleteName, initialPlan,
                       return (
                         <div className="mt-auto pt-2 border-t border-dashed border-gray-100">
                           <button
-                            onClick={() => handleQuickAddSession(week!.id, dayIdx, {
+                            onClick={() => handleQuickAddSession(week!.id, dayIdx + 1, {
                               type: 'FUERZA', durationMin: 60, distanceKm: null, zoneTarget: '', detailText: '', sportLabel: gymDay.label, workoutDayId: gymDay.id,
                             })}
                             disabled={saving}

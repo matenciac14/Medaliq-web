@@ -60,7 +60,7 @@ export default function Home() {
           { '@type': 'Question', name: 'Como subo lo que ya tengo?', acceptedAnswer: { '@type': 'Answer', text: 'Invitas a tus atletas con tu codigo unico y suben su perfil en minutos. Te ayudamos a cargar los primeros.' } },
           { '@type': 'Question', name: 'Y si no me sirve?', acceptedAnswer: { '@type': 'Answer', text: 'Cancela cuando quieras — sin letra chica, sin permanencia.' } },
           { '@type': 'Question', name: 'Que es Medaliq?', acceptedAnswer: { '@type': 'Answer', text: 'Medaliq es una plataforma de tracking y coaching deportivo para Latinoamerica. Permite a entrenadores gestionar sus atletas con planes periodizados, nutricion personalizada y seguimiento semanal desde un solo panel. Los atletas registran sesiones, nutricion y ejercicios desde la app.' } },
-          { '@type': 'Question', name: 'Cuanto cuesta Medaliq para coaches?', acceptedAnswer: { '@type': 'Answer', text: 'Medaliq tiene 4 planes para coaches: Starter (gratis, hasta 2 atletas), Growth ($59/mes, 3-10 atletas), Pro ($139/mes, 11-30 atletas) y Scale ($139/mes + $4/atleta sobre 30). 0% de fee sobre pagos de atletas.' } },
+          { '@type': 'Question', name: 'Cuanto cuesta Medaliq para coaches?', acceptedAnswer: { '@type': 'Answer', text: 'Medaliq tiene 4 planes para coaches: Starter (gratis, hasta 2 atletas), Growth ($59/mes, hasta 10 atletas), Pro ($139/mes, 11-30 atletas) y Scale ($139/mes + $4/atleta sobre 30). 0% de fee sobre pagos de atletas.' } },
         ],
       }} />
       <JsonLd data={{
@@ -127,7 +127,7 @@ export default function Home() {
           {/* Right actions */}
           <div className="flex items-center gap-3">
             <a href="/login" className="inline-block bg-[#ea580c] hover:bg-[#ea6c0a] text-white font-semibold rounded-lg transition-transform hover:scale-105 active:scale-95 whitespace-nowrap text-xs px-3 py-2 sm:text-sm sm:px-5">
-              <span className="sm:hidden">Reservar</span>
+              <span className="sm:hidden">Registrarse</span>
               <span className="hidden sm:inline">{l.nav.cta}</span>
             </a>
           </div>
@@ -215,7 +215,7 @@ export default function Home() {
               </a>
               <div className="flex items-center gap-2 mt-1 anim-fade-in delay-500">
                 <span className="text-[#ea580c] text-xs">★★★★★</span>
-                <span className="text-blue-200 text-xs">Coaches en LatAm ya reservaron su lugar</span>
+                <span className="text-blue-200 text-xs">Hecho en LatAm, para LatAm</span>
               </div>
             </div>
           </div>
@@ -1024,7 +1024,7 @@ export default function Home() {
                   ))}
                 </ul>
                 <a href="/login" className="block mt-6 w-full py-3 rounded-xl bg-[#ea580c] hover:bg-[#ea6c0a] text-white font-bold transition-transform hover:scale-105 active:scale-95 text-sm anim-pulse-cta text-center">
-                  Probar Pro gratis →
+                  Activar Pro →
                 </a>
               </div>
             </RevealOnScroll>

@@ -143,4 +143,9 @@ function StatBlock({ label, value, sub, color, trend }: {
 }
 
 const RETENTION_BARS = [24, 28, 26, 30, 28, 32]
-const RETENTION_MONTHS = ['Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago']
+const RETENTION_MONTHS = Array.from({ length: 6 }, (_, i) => {
+  const d = new Date()
+  d.setMonth(d.getMonth() - (5 - i))
+  const label = d.toLocaleString('es', { month: 'short' }).replace('.', '')
+  return label.charAt(0).toUpperCase() + label.slice(1)
+})

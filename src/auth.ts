@@ -82,7 +82,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Brute-force protection: 10 intentos/min por email
         const email = (credentials.email as string).toLowerCase().trim()
         const { allowed } = await rateLimitAsync(`login-${email}`, { limit: 10, windowMs: 60_000 })
-        if (!allowed) return null
+        if (!allowed) throw new Error('RATE_LIMITED')
 
         const user = await prisma.user.findUnique({
           where: { email },
@@ -168,9 +168,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (dbUser && !subscription) {
             const billingEnabled = process.env.BILLING_ENABLED === 'true'
             const initialTier = billingEnabled ? 'FREE' : 'PRO'
-            await prisma.userSubscription.create({
-              data: { userId: t.id, tier: initialTier },
-            }).catch(() => {}) // Ignore if already created by concurrent request
+            await prisma.userSubscription.upsert({
+              where: { userId: t.id },
+              create: { userId: t.id, tier: initialTier },
+              update: {},
+            }).catch(() => {})
             subscription = { tier: initialTier as 'FREE' | 'PRO', trialEndsAt: null }
           }
           if (dbUser) {

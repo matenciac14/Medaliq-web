@@ -25,7 +25,7 @@ const inter = Inter({
 });
 
 const META_TITLE = 'Medaliq — Plataforma de coaching y tracking deportivo para LatAm'
-const META_DESCRIPTION = 'Gestiona tus atletas desde un solo panel. Planes periodizados, nutricion personalizada con Mifflin-St Jeor, zonas de FC con Karvonen y seguimiento semanal. Gratis para coaches con hasta 5 atletas.'
+const META_DESCRIPTION = 'Gestiona tus atletas desde un solo panel. Planes periodizados, nutricion personalizada con Mifflin-St Jeor, zonas de FC con Karvonen y seguimiento semanal. Gratis para coaches con hasta 2 atletas.'
 const META_URL = 'https://medaliq.com'
 const META_IMAGE = 'https://medaliq.com/opengraph-image'
 
@@ -72,11 +72,6 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   alternates: {
     canonical: META_URL,
-    languages: {
-      'es': META_URL,
-      'en': `${META_URL}?lang=en`,
-      'pt': `${META_URL}?lang=pt`,
-    },
   },
   openGraph: {
     type: 'website',
@@ -98,8 +93,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: 'cover',
   themeColor: '#1e3a5f',
 };

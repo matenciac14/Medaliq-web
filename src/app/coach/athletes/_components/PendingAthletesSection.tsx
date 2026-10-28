@@ -44,7 +44,7 @@ export default function PendingAthletesSection({ athletes }: { athletes: Pending
 
       {/* Actions */}
       <a
-        href="/coach/athletes?filter=pending"
+        href="/coach/athletes?filter=all"
         className="font-medium whitespace-nowrap shrink-0"
         style={{ fontSize: 12, color: '#1e3a5f' }}
       >
