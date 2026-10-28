@@ -53,14 +53,15 @@ export async function POST(
     return NextResponse.json({ error: 'Atleta no encontrado' }, { status: 404 })
   }
 
-  const body = await req.json() as {
+  const body = await req.json().catch(() => null) as {
     sport: string
     metric: string
     value: number
     unit: string
     testedAt: string
     notes?: string
-  }
+  } | null
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
 
   if (!body.sport || !body.metric || body.value == null || !body.unit || !body.testedAt) {
     return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 })
@@ -107,7 +108,9 @@ export async function DELETE(
     return NextResponse.json({ error: 'Atleta no encontrado' }, { status: 404 })
   }
 
-  const { benchmarkId } = await req.json() as { benchmarkId: string }
+  const body2 = await req.json().catch(() => null) as { benchmarkId: string } | null
+  if (!body2) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
+  const { benchmarkId } = body2
   if (!benchmarkId) {
     return NextResponse.json({ error: 'benchmarkId requerido' }, { status: 400 })
   }

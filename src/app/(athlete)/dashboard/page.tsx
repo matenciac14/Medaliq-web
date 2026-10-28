@@ -20,7 +20,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
   const { weekOffset: weekOffsetParam } = await searchParams
-  const rawWeekOffset = parseInt(weekOffsetParam ?? '0') || 0
+  const rawWeekOffset = Math.max(-52, Math.min(0, parseInt(weekOffsetParam ?? '0') || 0))
 
   const d = await getDashboardData(session.user.id, rawWeekOffset, session.user.isB2B ?? false)
 
@@ -34,7 +34,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         weekLabel={d.dashboardMode === 'TRAINING' ? `Semana ${d.selectedWeekNum || d.planData.currentWeek} · ${d.weekDateLabel}` : d.weekDateLabel}
         weekOffset={d.weekOffset}
         canGoPrev={d.dashboardMode === 'TRAINING' ? d.selectedWeekNum > 1 : true}
-        canGoNext={true}
+        canGoNext={d.weekOffset < 0}
         streakDays={d.streakDays}
       />
 
@@ -77,6 +77,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           planPhase={d.phaseDisplay}
           planWeekNum={d.selectedWeekNum || d.planData.currentWeek}
           planTotalWeeks={d.planData.totalWeeks}
+          serverTodayDow={d.todayDow}
         />
       </div>
 
@@ -90,7 +91,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             weekLabel={d.dashboardMode === 'TRAINING' ? `Semana ${d.selectedWeekNum || d.planData.currentWeek} · ${d.weekDateLabel}` : d.weekDateLabel}
             weekOffset={d.weekOffset}
             canGoPrev={d.dashboardMode === 'TRAINING' ? d.selectedWeekNum > 1 : true}
-            canGoNext={true}
+            canGoNext={d.weekOffset < 0}
           />
           <div className="px-3 pb-3">
               {d.dashboardMode === 'RECOVERY' && d.lastCompletedPlanInfo && (
@@ -118,6 +119,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 planTotalWeeks={d.planData.totalWeeks}
                 coachName={d.coachRelation?.coach.name ?? null}
                 initialCalendarWeek={d.initialCalendarWeek}
+                serverTodayDow={d.todayDow}
               />
 
               {d.dashboardMode !== 'FREE' && (
@@ -185,6 +187,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             } : null}
             checkinPending={d.checkinPending}
             hasActivePlan={!!d.activePlanId}
+            lastCompletedPlanInfo={d.lastCompletedPlanInfo}
+            recoveryDaysSinceEnd={d.recoveryDaysSinceEnd}
+            isB2B={d.isB2B}
+            timezone={d.timezone}
           />
 
           {/* Desktop: Info banner row */}
@@ -239,17 +245,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           {/* Desktop: Resumen Semanal + Actividad Reciente — side by side per Figma */}
           <div className="hidden sm:grid sm:grid-cols-2 gap-3">
             <WeeklySummaryCard
-              lastCheckIn={d.lastCheckIn ? {
-                hardestSessionRpe: d.lastCheckIn.hardestSessionRpe ?? null,
-                energyLevel: d.lastCheckIn.energyLevel ?? null,
-                weightKg: d.lastCheckIn.weightKg ?? null,
-              } : null}
-              formCheckInDate={d.formCheckInDate}
               currentVolume={d.currentWeekVolumeKm ?? null}
               volumeDeltaPct={d.volumeDeltaPct ?? null}
               completedCount={d.completedCount}
               totalTraining={d.totalTraining}
-              variant={d.dashboardMode === 'FREE' ? 'free' : 'default'}
               weekSessionCount={d.weekSessionCount}
               weekSessionTarget={d.weekSessionTarget}
               weekSessionDelta={d.weekSessionDelta}
@@ -259,6 +258,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               recentActivity={d.dashSummary.recentActivity}
               hasEverLogged={d.dashSummary.hasEverLogged}
               streakDays={d.streakDays}
+              timezone={d.timezone}
             />
           </div>
 

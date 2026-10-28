@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import type { SetType } from '@/generated/prisma/enums'
+import { rateLimitAsync } from '@/lib/rate_limit'
 
-async function getAthleteId(): Promise<string | null> {
-  return (await auth())?.user?.id ?? null
+async function getSession() {
+  const session = await auth()
+  return session
+}
+
+async function getAthleteIdWithGate(): Promise<{ athleteId: string } | NextResponse> {
+  const session = await getSession()
+  const athleteId = session?.user?.id
+  if (!athleteId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  if (!session.user.features?.gym) {
+    return NextResponse.json({ error: 'Función no disponible en tu plan actual.', upgrade: '/upgrade' }, { status: 402 })
+  }
+  return { athleteId }
 }
 
 // ── GET /api/athlete/gym/routines/[id] ──────────────────────────────────────
@@ -13,8 +25,12 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const athleteId = await getAthleteId()
-  if (!athleteId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const result = await getAthleteIdWithGate()
+  if (result instanceof NextResponse) return result
+  const { athleteId } = result
+
+  const rl = await rateLimitAsync(`web-${athleteId}:gym-routine-detail`, { limit: 300, windowMs: 60_000 })
+  if (!rl.allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 
   const { id } = await params
 
@@ -40,8 +56,12 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const athleteId = await getAthleteId()
-  if (!athleteId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const result = await getAthleteIdWithGate()
+  if (result instanceof NextResponse) return result
+  const { athleteId } = result
+
+  const rl = await rateLimitAsync(`web-${athleteId}:gym-routine-detail`, { limit: 100, windowMs: 60_000 })
+  if (!rl.allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 
   const { id } = await params
 
@@ -117,8 +137,12 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const athleteId = await getAthleteId()
-  if (!athleteId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const result = await getAthleteIdWithGate()
+  if (result instanceof NextResponse) return result
+  const { athleteId } = result
+
+  const rl = await rateLimitAsync(`web-${athleteId}:gym-routine-detail`, { limit: 100, windowMs: 60_000 })
+  if (!rl.allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 
   const { id } = await params
 

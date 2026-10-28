@@ -10,6 +10,10 @@ const LoginSchema = z.object({ email: emailSchema, password: passwordSchema })
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
+    const { allowed: ipAllowed } = await rateLimitAsync(`mobile-login-ip:${ip}`, { limit: 30, windowMs: 60_000 })
+    if (!ipAllowed) return NextResponse.json({ error: 'Demasiados intentos. Intenta en un minuto.' }, { status: 429 })
+
     const raw = await req.json().catch(() => null)
     const parsed = parseBody(LoginSchema, raw)
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
@@ -76,6 +80,7 @@ export async function POST(req: NextRequest) {
         email: payload.email,
         name: payload.name,
         role: payload.role,
+        status: payload.status,
         onboardingCompleted: payload.onboardingCompleted,
         activated: payload.activated,
         isB2B: payload.isB2B,

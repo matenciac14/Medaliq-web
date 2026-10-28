@@ -29,8 +29,10 @@ e2e/.auth/
 .DS_Store
 *.pem
 
-# Claude Code
+# Claude Code — ignorar settings locales, trackear memoria
 .claude/
+!.claude/memory/
+!.claude/memory/**
 
 # debug
 npm-debug.log*
@@ -51,10 +53,5 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# Claude Code — instrucciones locales, no commitear
-CLAUDE.md
-CLAUDE-SCHEMA.md
+# Claude Code — worktree local, no commitear
 CLAUDE.worktree.md
-
-# Claude Code
-.claude/

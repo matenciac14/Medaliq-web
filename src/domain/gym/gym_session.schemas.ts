@@ -25,7 +25,7 @@ export const ExerciseOverrideSchema = z.object({
 export const GymCompleteSchema = z.object({
   assignedWorkoutId: z.string().min(1).optional(),
   plannedSessionId: z.string().min(1).optional(),
-  dayOfWeek: z.number().int().min(0).max(6),
+  dayOfWeek: z.number().int().min(1).max(7),
   rpe: z.number().int().min(1).max(10).optional(),
   durationMin: z.number().int().min(0).max(600).optional(),
   energyState: z.enum(['EXHAUSTED', 'NORMAL', 'ENERGIZED']).optional(),

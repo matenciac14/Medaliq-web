@@ -19,6 +19,9 @@ type CoachProfileData = {
   yearsExp: number | null
   certifications: string[]
   isPublic: boolean
+  identification?: string | null
+  phoneWa?: string | null
+  showPhoneWa?: boolean
 }
 
 type Program = {
@@ -75,6 +78,7 @@ export default function ProfileSection({ initialProfile, initialPrograms, initia
 
   async function refreshPrograms() {
     const res = await fetch('/api/coach/programs')
+    if (!res.ok) return
     const data = await res.json()
     setPrograms(data.programs ?? [])
     setShowProgramForm(false)
@@ -82,6 +86,7 @@ export default function ProfileSection({ initialProfile, initialPrograms, initia
 
   async function refreshPosts() {
     const res = await fetch('/api/coach/posts')
+    if (!res.ok) return
     const data = await res.json()
     setPosts(data.posts ?? [])
     setShowPostForm(false)

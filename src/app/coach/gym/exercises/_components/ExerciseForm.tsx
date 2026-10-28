@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { BODY_PART_LABELS, TARGET_LABELS, EQUIPMENT_LABELS, MECHANIC_LABELS } from '@/lib/gym/labels'
 
 export default function ExerciseForm() {
   const router = useRouter()
@@ -74,54 +75,62 @@ export default function ExerciseForm() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Parte del cuerpo <span className="text-red-500">*</span>
-              <span className="text-gray-400 font-normal ml-1">(ej. upper legs)</span>
             </label>
-            <input
-              type="text"
+            <select
               value={bodyPart}
               onChange={(e) => setBodyPart(e.target.value)}
-              placeholder="upper legs"
               className={inputCls}
-            />
+            >
+              <option value="">Seleccionar</option>
+              {Object.entries(BODY_PART_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Músculo objetivo <span className="text-red-500">*</span>
-              <span className="text-gray-400 font-normal ml-1">(ej. quads)</span>
             </label>
-            <input
-              type="text"
+            <select
               value={target}
               onChange={(e) => setTarget(e.target.value)}
-              placeholder="quads"
               className={inputCls}
-            />
+            >
+              <option value="">Seleccionar</option>
+              {Object.entries(TARGET_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Equipamiento <span className="text-red-500">*</span>
-              <span className="text-gray-400 font-normal ml-1">(ej. barbell)</span>
             </label>
-            <input
-              type="text"
+            <select
               value={equipment}
               onChange={(e) => setEquipment(e.target.value)}
-              placeholder="barbell"
               className={inputCls}
-            />
+            >
+              <option value="">Seleccionar</option>
+              {Object.entries(EQUIPMENT_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Mecánica
-              <span className="text-gray-400 font-normal ml-1">(ej. compound)</span>
             </label>
-            <input
-              type="text"
+            <select
               value={mechanic}
               onChange={(e) => setMechanic(e.target.value)}
-              placeholder="compound"
               className={inputCls}
-            />
+            >
+              <option value="">Seleccionar</option>
+              {Object.entries(MECHANIC_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
         </div>
 

@@ -36,6 +36,17 @@ function buildFeaturesFromUser(u: {
   featurePlan: boolean; featureCheckin: boolean; featureNutrition: boolean;
   featureProgress: boolean; featureLog: boolean; featureCoach: boolean; featureGym: boolean;
 }) {
+  const billingEnabled = process.env.BILLING_ENABLED === 'true'
+
+  // En beta (billing desactivado), todos son PRO → features gateados por billing se fuerzan a true.
+  // Al activar billing, se respetan las columnas de DB controladas por TierFeatureConfig.
+  if (!billingEnabled) {
+    return {
+      plan: true, checkin: true, nutrition: true,
+      progress: true, log: true, coach: u.featureCoach, gym: true,
+    }
+  }
+
   return {
     plan:      u.featurePlan,
     checkin:   u.featureCheckin,
@@ -71,7 +82,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Brute-force protection: 10 intentos/min por email
         const email = (credentials.email as string).toLowerCase().trim()
         const { allowed } = await rateLimitAsync(`login-${email}`, { limit: 10, windowMs: 60_000 })
-        if (!allowed) return null
+        if (!allowed) throw new Error('RATE_LIMITED')
 
         const user = await prisma.user.findUnique({
           where: { email },
@@ -88,6 +99,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // GAP-03: gate de verificación de email — activo solo cuando EMAIL_GATE_ENABLED=true
         if (process.env.EMAIL_GATE_ENABLED === 'true' && !user.emailVerified) return null
+
+        // Bloquear login si el usuario está suspendido/bloqueado (paridad con mobile)
+        if (user.status === 'BLOCKED') throw new Error('ACCOUNT_BLOCKED')
+        if (user.status === 'SUSPENDED') throw new Error('ACCOUNT_SUSPENDED')
+        if (user.status !== 'ACTIVE') return null
 
         const features = buildFeaturesFromUser(user)
 
@@ -152,9 +168,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (dbUser && !subscription) {
             const billingEnabled = process.env.BILLING_ENABLED === 'true'
             const initialTier = billingEnabled ? 'FREE' : 'PRO'
-            await prisma.userSubscription.create({
-              data: { userId: t.id, tier: initialTier },
-            }).catch(() => {}) // Ignore if already created by concurrent request
+            await prisma.userSubscription.upsert({
+              where: { userId: t.id },
+              create: { userId: t.id, tier: initialTier },
+              update: {},
+            }).catch(() => {})
             subscription = { tier: initialTier as 'FREE' | 'PRO', trialEndsAt: null }
           }
           if (dbUser) {

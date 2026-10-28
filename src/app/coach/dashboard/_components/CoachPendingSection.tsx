@@ -19,7 +19,7 @@ export function CoachPendingSection({ overduePayments, overdueTotal, pendingOnbo
         <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
           <h2 className="text-sm font-semibold" style={{ color: '#1f3b5e' }}>Pagos vencidos</h2>
           {overduePayments.length > 0 && (
-            <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-white text-[10px] font-bold" style={{ backgroundColor: '#22c35d' }}>
+            <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-white text-[10px] font-bold" style={{ backgroundColor: '#ea580c' }}>
               {overduePayments.length}
             </span>
           )}
@@ -96,7 +96,7 @@ export function CoachPendingSection({ overduePayments, overdueTotal, pendingOnbo
                         className="text-[10px] font-medium shrink-0"
                         style={{ color: '#ea580c' }}
                       >
-                        Reenviar link
+                        Ver atleta →
                       </a>
                     </div>
                   )

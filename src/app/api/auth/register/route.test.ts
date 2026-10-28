@@ -57,9 +57,10 @@ describe('POST /api/auth/register — PERSIST-02', () => {
   })
 
   it('crea usuario DENTRO del $transaction (PERSIST-02)', async () => {
-    vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) =>
-      fn({ user: { create: vi.fn().mockResolvedValue({ id: 'u1' }) }, userSubscription: { create: vi.fn().mockResolvedValue({}) } })
-    )
+    vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+      const result = await fn({ user: { create: vi.fn().mockResolvedValue({ id: 'u1' }) }, userSubscription: { create: vi.fn().mockResolvedValue({}) }, verificationToken: { create: vi.fn().mockResolvedValue({}) } })
+      return result
+    })
 
     const res = await POST(req(VALID_ATHLETE))
     expect(res.status).toBe(201)
@@ -80,7 +81,7 @@ describe('POST /api/auth/register — PERSIST-02', () => {
     const mockProfileCreate = vi.fn().mockResolvedValue({})
 
     vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) =>
-      fn({ user: { create: mockCreate }, userSubscription: { create: mockSubCreate }, coachProfile: { create: mockProfileCreate } })
+      fn({ user: { create: mockCreate }, userSubscription: { create: mockSubCreate }, coachProfile: { create: mockProfileCreate }, verificationToken: { create: vi.fn().mockResolvedValue({}) } })
     )
 
     await POST(req(VALID_COACH))
@@ -91,9 +92,9 @@ describe('POST /api/auth/register — PERSIST-02', () => {
   })
 
   it('retorna 201 con success:true en registro exitoso', async () => {
-    vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) =>
-      fn({ user: { create: vi.fn().mockResolvedValue({ id: 'u3' }) }, userSubscription: { create: vi.fn().mockResolvedValue({}) } })
-    )
+    vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+      return fn({ user: { create: vi.fn().mockResolvedValue({ id: 'u3' }) }, userSubscription: { create: vi.fn().mockResolvedValue({}) }, verificationToken: { create: vi.fn().mockResolvedValue({}) } })
+    })
 
     const res = await POST(req(VALID_ATHLETE))
     expect(res.status).toBe(201)

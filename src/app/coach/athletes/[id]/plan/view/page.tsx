@@ -4,7 +4,8 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import { MedaliqLogo } from '@/components/brand/MedaliqLogo'
 
-const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+// Index 0 unused; base-1: 1=Lun...7=Dom (matches DB convention)
+const DAY_NAMES = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 const SESSION_COLORS: Record<string, string> = {
   RODAJE_Z2: '#16a34a', FARTLEK: '#ea580c', TEMPO: '#dc2626',

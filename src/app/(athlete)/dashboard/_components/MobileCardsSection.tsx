@@ -4,6 +4,7 @@ import TodayLogCard from '../../_components/TodayLogCard'
 import NutritionProgressCard from '../../_components/ui/NutritionProgressCard'
 import HydrationWidget from '../../nutrition/_components/HydrationWidget'
 import MealSlotsWidget from './MealSlotsWidget'
+import PlanCompletionCard from '../../_components/PlanCompletionCard'
 import type { DashboardMode } from '../_lib/get_dashboard_data'
 import type { DashboardSummary } from '@/domain/dashboard/get_dashboard_summary.use_case'
 
@@ -53,8 +54,14 @@ type Props = {
   checkinPending: boolean
   hasActivePlan: boolean
 
+  // Recovery mode
+  lastCompletedPlanInfo?: { name: string; totalWeeks: number; sessionsLogged: number; sessionsTotal: number } | null
+  recoveryDaysSinceEnd?: number | null
+
   // Flags
   hasEverLogged: boolean
+  isB2B: boolean
+  timezone: string
 }
 
 export default function MobileCardsSection(props: Props) {
@@ -63,7 +70,19 @@ export default function MobileCardsSection(props: Props) {
       {props.dashboardMode === 'FREE' || props.dashboardMode === 'GYM' ? (
         <FreeMobileCards {...props} />
       ) : (
-        <ProMobileCards {...props} />
+        <>
+          {props.dashboardMode === 'RECOVERY' && props.lastCompletedPlanInfo && (
+            <PlanCompletionCard
+              planName={props.lastCompletedPlanInfo.name}
+              totalWeeks={props.lastCompletedPlanInfo.totalWeeks}
+              sessionsLogged={props.lastCompletedPlanInfo.sessionsLogged}
+              sessionsTotal={props.lastCompletedPlanInfo.sessionsTotal}
+              recoveryDaysSinceEnd={props.recoveryDaysSinceEnd ?? 0}
+              isB2B={props.isB2B ?? false}
+            />
+          )}
+          <ProMobileCards {...props} />
+        </>
       )}
     </div>
   )
@@ -103,7 +122,7 @@ function FreeMobileCards(props: Props) {
       <TodayLogCard initial={todayLogRaw ?? null} />
 
       {/* Actividad reciente */}
-      <RecentActivityCard recentActivity={dashSummary.recentActivity} hasEverLogged={hasEverLogged} streakDays={props.streakDays} />
+      <RecentActivityCard recentActivity={dashSummary.recentActivity} hasEverLogged={hasEverLogged} streakDays={props.streakDays} timezone={props.timezone} />
 
       {/* CTAs */}
       <UpsellBannerPro />
@@ -159,7 +178,7 @@ function ProMobileCards(props: Props) {
       <TodayLogCard initial={todayLogRaw ?? null} />
 
       {/* Actividad reciente */}
-      <RecentActivityCard recentActivity={dashSummary.recentActivity} hasEverLogged={true} streakDays={props.streakDays} />
+      <RecentActivityCard recentActivity={dashSummary.recentActivity} hasEverLogged={props.hasEverLogged} streakDays={props.streakDays} timezone={props.timezone} />
 
       {/* Coach card (B2B) */}
       {props.coach && (
@@ -321,10 +340,11 @@ function MetricCol({ label, value, unit, color }: { label: string; value: string
 
 // -- RecentActivityCard (4 items max, scrollbar, no CTA) ---------------------
 
-function RecentActivityCard({ recentActivity, hasEverLogged, streakDays }: {
+function RecentActivityCard({ recentActivity, hasEverLogged, streakDays, timezone }: {
   recentActivity: { type: string; completedAt: string; durationMin: number | null; rpe: number | null }[]
   hasEverLogged: boolean
   streakDays: number
+  timezone: string
 }) {
   if (!hasEverLogged || recentActivity.length === 0) return null
 
@@ -338,20 +358,20 @@ function RecentActivityCard({ recentActivity, hasEverLogged, streakDays }: {
         )}
       </div>
       <div className="max-h-[205px] overflow-y-auto">
-        {recentActivity.slice(0, 4).map((a, i) => (
-          <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 ${i > 0 ? 'border-t border-gray-100' : ''}`}>
+        {recentActivity.slice(0, 4).map((a) => (
+          <div key={`${a.type}-${a.completedAt}`} className={`flex items-center gap-3 px-3.5 py-2.5 border-t first:border-t-0 border-gray-100`}>
             <span className="text-xl">{SESSION_ICONS[a.type] ?? '🏅'}</span>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900">{SESSION_NAMES[a.type] ?? a.type.replace(/_/g, ' ')}</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                {new Date(a.completedAt).toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' })}
+                {new Date(a.completedAt).toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short', timeZone: timezone })}
                 {a.durationMin ? ` · ${a.durationMin} min` : ''}
               </p>
             </div>
             {a.rpe != null && (
               <span className="text-xs font-semibold text-[#1e3a5f] bg-gray-100 rounded-lg px-2 py-1">RPE {a.rpe}</span>
             )}
-            <Link href="/progress" className="text-xs font-semibold text-[#ea580c]">Ver →</Link>
+            <Link href={a.type === 'FUERZA' ? '/gym/history' : '/progress'} className="text-xs font-semibold text-[#ea580c]">Ver →</Link>
           </div>
         ))}
       </div>

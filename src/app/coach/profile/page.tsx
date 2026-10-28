@@ -9,13 +9,19 @@ export default async function CoachProfilePage() {
     redirect('/login')
   }
 
-  const profile = await prisma.coachProfile.findUnique({
-    where: { coachId: session.user.id },
-    include: {
-      programs: { orderBy: { createdAt: 'desc' } },
-      posts: { orderBy: { createdAt: 'desc' } },
-    },
-  })
+  const [profile, user] = await Promise.all([
+    prisma.coachProfile.findUnique({
+      where: { coachId: session.user.id },
+      include: {
+        programs: { orderBy: { createdAt: 'desc' } },
+        posts: { orderBy: { createdAt: 'desc' } },
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { identification: true, phoneWa: true, showPhoneWa: true },
+    }),
+  ])
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -52,6 +58,9 @@ export default async function CoachProfilePage() {
           yearsExp: profile.yearsExp,
           certifications: profile.certifications,
           isPublic: profile.isPublic,
+          identification: user?.identification ?? null,
+          phoneWa: user?.phoneWa ?? null,
+          showPhoneWa: user?.showPhoneWa ?? false,
         } : null}
         initialPrograms={profile?.programs ?? []}
         initialPosts={(profile?.posts ?? []).map(p => ({ ...p, createdAt: p.createdAt.toISOString() }))}

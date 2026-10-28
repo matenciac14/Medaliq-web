@@ -13,6 +13,10 @@ export async function POST(req: NextRequest) {
   const { allowed } = await rateLimitAsync(`mobile-${mobile.id}:set-role`, { limit: 20, windowMs: 60_000 })
   if (!allowed) return NextResponse.json({ error: 'Demasiadas solicitudes. Intenta en un minuto.' }, { status: 429 })
 
+  if (!mobile.needsRoleSelection) {
+    return NextResponse.json({ error: 'Operación no permitida.' }, { status: 403 })
+  }
+
   const raw = await req.json().catch(() => null)
   const parsed = parseBody(z.object({ role: roleSchema }), raw)
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
@@ -21,24 +25,49 @@ export async function POST(req: NextRequest) {
   const isCoach = role === 'COACH'
   const now = new Date()
 
-  const updatedUser = await prisma.user.update({
-    where: { id: mobile.id },
-    data: {
-      role,
-      needsRoleSelection: false,
-      ...(isCoach ? {
-        featurePlan:      false,
-        featureCheckin:   false,
-        featureNutrition: false,
-        featureProgress:  false,
-        featureLog:       false,
-        featureCoach:     true,
-        featureGym:       false,
-        onboardingCompleted:   true,
-        onboardingCompletedAt: now,
-      } : {}),
-    },
-    select: MOBILE_USER_SELECT,
+  const updatedUser = await prisma.$transaction(async (tx) => {
+    const u = await tx.user.update({
+      where: { id: mobile.id },
+      data: {
+        role,
+        needsRoleSelection: false,
+        ...(isCoach ? {
+          featurePlan:      false,
+          featureCheckin:   false,
+          featureNutrition: false,
+          featureProgress:  false,
+          featureLog:       false,
+          featureCoach:     true,
+          featureGym:       false,
+          onboardingCompleted:   true,
+          onboardingCompletedAt: now,
+        } : {}),
+      },
+      select: MOBILE_USER_SELECT,
+    })
+
+    await tx.userSubscription.upsert({
+      where: { userId: mobile.id },
+      create: {
+        userId: mobile.id,
+        tier: 'PRO',
+        ...(isCoach ? { coachTier: 'STARTER' } : {}),
+      },
+      update: {},
+    })
+
+    if (isCoach) {
+      const name = u.name ?? 'Coach'
+      const baseSlug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      const slug = `${baseSlug}-${mobile.id.slice(-6)}`
+      await tx.coachProfile.upsert({
+        where: { coachId: mobile.id },
+        create: { coachId: mobile.id, slug },
+        update: {},
+      })
+    }
+
+    return u
   })
 
   const [coachRelation, subscription] = await Promise.all([

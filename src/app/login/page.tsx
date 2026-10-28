@@ -38,7 +38,15 @@ export default function LoginPage() {
     setLoading(false)
 
     if (result?.error) {
-      setError('Correo o contraseña incorrectos.')
+      if (result.code === 'RATE_LIMITED') {
+        setError('Demasiados intentos. Espera un momento e intenta de nuevo.')
+      } else if (result.code === 'ACCOUNT_BLOCKED') {
+        setError('Tu cuenta ha sido bloqueada. Contacta soporte.')
+      } else if (result.code === 'ACCOUNT_SUSPENDED') {
+        setError('Tu cuenta está suspendida.')
+      } else {
+        setError('Correo o contraseña incorrectos.')
+      }
       return
     }
 
@@ -104,6 +112,24 @@ export default function LoginPage() {
 
           <h1 className="text-xl lg:text-2xl font-bold text-[#1e3a5f] mb-1 text-center">Bienvenido de vuelta</h1>
           <p className="text-sm lg:text-sm text-gray-500 mb-6 lg:mb-8 text-center">Ingresa tus datos para continuar</p>
+
+          {searchParams.get('verified') === '1' && (
+            <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+              ¡Email verificado! Ya puedes iniciar sesión.
+            </div>
+          )}
+
+          {searchParams.get('error') === 'token-invalido' && (
+            <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-700">
+              El enlace de verificación no es válido o ya fue usado.
+            </div>
+          )}
+
+          {searchParams.get('error') === 'token-expirado' && (
+            <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-700">
+              El enlace de verificación expiró. Solicita uno nuevo.
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">

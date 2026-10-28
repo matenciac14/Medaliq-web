@@ -177,6 +177,7 @@ export function FoodLogsSection({
     })
   }
 
+  // TODO: usar target diario desde adherenceData (por día: hard/easy/rest) en lugar del promedio global
   const avgTargetKcal = nutritionPlan
     ? Math.round((nutritionPlan.targetKcalHard + nutritionPlan.targetKcalEasy + nutritionPlan.targetKcalRest) / 3)
     : null

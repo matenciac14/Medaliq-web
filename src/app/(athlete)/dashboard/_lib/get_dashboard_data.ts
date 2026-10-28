@@ -149,6 +149,9 @@ export type DashboardData = {
 
   // Trial countdown
   trialDaysLeft: number | null
+
+  // Server-computed today DOW (1=Mon…7=Sun) for client timezone accuracy
+  todayDow: number
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -266,7 +269,13 @@ export async function getDashboardData(userId: string, rawWeekOffset: number, se
   const assignedWorkout = assignedWorkoutRaw ?? null
   const todayGymDay = assignedWorkout?.template.days.find((d) => d.dayOfWeek === todayDow) ?? null
   const hasGymToday = !!(todayGymDay && !todayGymDay.isRestDay)
-  const todayGymSession = recentGymSessions.find((gs) => new Date(gs.date).toDateString() === new Date().toDateString()) ?? null
+  const todayLocal = todayInTz(userTz)
+  const todayStr = `${todayLocal.getFullYear()}-${String(todayLocal.getMonth() + 1).padStart(2, '0')}-${String(todayLocal.getDate()).padStart(2, '0')}`
+  const todayGymSession = recentGymSessions.find((gs) => {
+    const d = new Date(gs.date)
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    return dateStr === todayStr
+  }) ?? null
   const gymDoneToday = !!todayGymSession
 
   // ── Self-directed: today's routine day ─────────────────────────────────
@@ -311,24 +320,27 @@ export async function getDashboardData(userId: string, rawWeekOffset: number, se
     }),
   ])
 
+  const tzOpt = { timeZone: userTz ?? 'UTC' }
   const activeDaysThisWeek = new Set([
-    ...weekFreeLogs.map((l) => new Date(l.completedAt).toDateString()),
-    ...weekGymSessions.map((g) => new Date(g.date).toDateString()),
+    ...weekFreeLogs.map((l) => new Date(l.completedAt).toLocaleDateString('en-CA', tzOpt)),
+    ...weekGymSessions.map((g) => new Date(g.date).toLocaleDateString('en-CA', tzOpt)),
   ])
-  const weekSessionCount = activeDaysThisWeek.size
+  // In TRAINING mode the parallel free-log/gym-session fetch is skipped (returns []).
+  // Derive weekSessionCount from plan completedCount instead so it's never 0 when sessions exist.
+  const weekSessionCountFree = activeDaysThisWeek.size
 
   const prevWeekActiveDays = new Set([
-    ...prevWeekFreeLogs.map((l) => new Date(l.completedAt).toDateString()),
-    ...prevWeekGymSessions.map((g) => new Date(g.date).toDateString()),
+    ...prevWeekFreeLogs.map((l) => new Date(l.completedAt).toLocaleDateString('en-CA', tzOpt)),
+    ...prevWeekGymSessions.map((g) => new Date(g.date).toLocaleDateString('en-CA', tzOpt)),
   ])
   const prevWeekSessionCount = prevWeekActiveDays.size
-  const weekSessionDelta = prevWeekSessionCount > 0 ? weekSessionCount - prevWeekSessionCount : null
+  const weekSessionDelta = prevWeekSessionCount > 0 ? weekSessionCountFree - prevWeekSessionCount : null
 
   const avgKcalPerDay = (() => {
     if (weekFoodLogs.length === 0) return null
     const byDay = new Map<string, number>()
     for (const log of weekFoodLogs) {
-      const key = new Date(log.date).toDateString()
+      const key = new Date(log.date).toLocaleDateString('en-CA', tzOpt)
       byDay.set(key, (byDay.get(key) ?? 0) + (log.kcalLogged ?? 0))
     }
     if (byDay.size === 0) return null
@@ -473,6 +485,9 @@ export async function getDashboardData(userId: string, rawWeekOffset: number, se
     ? Math.round(((currentWeekVolumeKm - prevVolume) / prevVolume) * 100)
     : null
 
+  // In TRAINING mode use completedCount so weekSessionCount is never stuck at 0
+  const weekSessionCount = activePlan ? completedCount : weekSessionCountFree
+
   return {
     dashboardMode,
     firstName,
@@ -566,5 +581,7 @@ export async function getDashboardData(userId: string, rawWeekOffset: number, se
     initialMealSlotLogs: computeMealSlotLogs(todayFoodLogs),
 
     trialDaysLeft,
+
+    todayDow,
   }
 }

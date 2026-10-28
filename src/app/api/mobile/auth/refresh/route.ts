@@ -10,15 +10,26 @@ export async function POST(req: NextRequest) {
   const { allowed } = await rateLimitAsync(`mobile-${mobile.id}:auth-refresh`, { limit: 10, windowMs: 60_000 })
   if (!allowed) return NextResponse.json({ error: 'Demasiadas solicitudes.' }, { status: 429 })
 
-  const [user, coachRelation, subscription] = await Promise.all([
+  const [user, coachRelation, subscription, healthProfile] = await Promise.all([
     prisma.user.findUnique({ where: { id: mobile.id }, select: MOBILE_USER_SELECT }),
     prisma.coachAthlete.findFirst({ where: { athleteId: mobile.id, status: 'ACTIVE' }, select: { id: true } }),
     prisma.userSubscription.findUnique({ where: { userId: mobile.id }, select: { tier: true, trialEndsAt: true } }),
+    prisma.healthProfile.findUnique({ where: { userId: mobile.id }, select: { sportGoal: true } }),
   ])
   if (!user) return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
 
+  if (user.status !== 'ACTIVE') {
+    const message = user.status === 'BLOCKED' ? 'Tu cuenta ha sido bloqueada.' : 'Tu cuenta está suspendida.'
+    return NextResponse.json({ error: message }, { status: 403 })
+  }
+
+  const sport = healthProfile?.sportGoal === 'STRENGTH_TRAINING' ? 'STRENGTH'
+    : healthProfile?.sportGoal === 'BODY_RECOMPOSITION' ? 'BOTH'
+    : 'RUNNING'
+
   const payload = buildMobileTokenPayload(user, {
     isB2B: !!coachRelation,
+    sport,
     subscriptionTier: subscription?.tier,
     trialEndsAt: subscription?.trialEndsAt,
   })

@@ -78,7 +78,7 @@ export default function NutricionTab({
 
       {/* ── COACH-NUT-UI-01: KPI band ── */}
       {nutritionExtLoaded && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
             <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Adherencia 7d</p>
             <p className="text-2xl font-black" style={{ color: adherenceColor }}>
@@ -300,6 +300,8 @@ function KcalStrategySelector({ athleteId, currentAdjustment }: { athleteId: str
       if (res.ok) {
         setSaved(true)
         setTimeout(() => setSaved(false), 2500)
+      } else {
+        alert('Error al aplicar la estrategia.')
       }
     } finally {
       setSaving(false)

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/auth'
-import { getWeekMonday, formatWeekRange, todayDowInTz } from '@/lib/core/date_utils'
+import { getWeekMonday, formatWeekRange, todayDowInTz, todayInTz, jsToOurDow } from '@/lib/core/date_utils'
 import { getPlanWeekNumber } from '@/lib/core/week_number'
 import { DAY_LABELS } from '@/lib/constants/sessions'
 import { translateMuscleGroup } from '@/lib/gym/labels'
@@ -30,7 +30,7 @@ export default async function GymPage({ searchParams }: { searchParams: Promise<
   const athleteId = session.user.id
   const { completed: completedParam, weekOffset: weekOffsetParam, selectedDow: selectedDowParam } = await searchParams
   const justCompleted = completedParam === '1'
-  const weekOffset = parseInt(weekOffsetParam ?? '0') || 0
+  const weekOffset = Math.max(-52, Math.min(52, parseInt(weekOffsetParam ?? '0') || 0))
   const isCurrentWeek = weekOffset === 0
   const selectedDow = parseInt(selectedDowParam ?? '0') || 0
 
@@ -100,7 +100,7 @@ export default async function GymPage({ searchParams }: { searchParams: Promise<
   })
 
   if (!assigned) {
-    const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    const sevenDaysAgo = new Date(todayInTz(userTz).getTime() - 7 * 86_400_000)
     const [coachRelation, publicTemplates, healthProfile, featuredExercises, rawMuscleSets] = await Promise.all([
       prisma.coachAthlete.findFirst({
         where: { athleteId, status: 'ACTIVE' },
@@ -314,7 +314,7 @@ export default async function GymPage({ searchParams }: { searchParams: Promise<
     select: { dayOfWeek: true, completed: true },
   })
 
-  const completedDows = new Set(weekSessions.filter((s) => s.completed).map((s) => s.dayOfWeek))
+  const completedDows = new Set(weekSessions.filter((s) => s.completed).map((s) => jsToOurDow(s.dayOfWeek)))
 
   // Detalle de la sesión seleccionada (SetLog reales)
   let selectedSession: {
@@ -340,11 +340,8 @@ export default async function GymPage({ searchParams }: { searchParams: Promise<
   } | null = null
 
   if (selectedDow >= 1 && selectedDow <= 7) {
-    const selDayStart = new Date(monday)
-    selDayStart.setDate(monday.getDate() + (selectedDow - 1))
-    selDayStart.setHours(0, 0, 0, 0)
-    const selDayEnd = new Date(selDayStart)
-    selDayEnd.setDate(selDayStart.getDate() + 1)
+    const selDayStart = new Date(monday.getTime() + (selectedDow - 1) * 86_400_000)
+    const selDayEnd = new Date(selDayStart.getTime() + 86_400_000)
 
     selectedSession = await prisma.gymSession.findFirst({
       where: {

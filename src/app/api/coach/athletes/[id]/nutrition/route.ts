@@ -49,7 +49,8 @@ export async function PATCH(
   })
   if (!link) return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
 
-  const body = (await request.json()) as Record<string, unknown>
+  const body = await request.json().catch(() => null) as Record<string, unknown> | null
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   const fields = ['tdee', 'targetKcalHard', 'targetKcalEasy', 'targetKcalRest', 'proteinG', 'carbsHardG', 'carbsEasyG', 'fatG']
   const data: Record<string, number> = {}
   for (const f of fields) {

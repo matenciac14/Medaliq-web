@@ -51,16 +51,21 @@ export async function POST(
 
     await tx.plannedSession.createMany({
       data: prevWeek.sessions.map((s) => {
-        const sessionDate = new Date(targetWeek.startDate)
-        sessionDate.setDate(sessionDate.getDate() + s.dayOfWeek - 1)
+        const base = new Date(targetWeek.startDate)
+        const sessionDate = new Date(Date.UTC(
+          base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate() + (s.dayOfWeek - 1)
+        ))
         return {
           weekId,
           dayOfWeek: s.dayOfWeek,
           type: s.type,
           intensity: getSessionIntensity(s.type),
           durationMin: s.durationMin,
+          distanceKm: s.distanceKm,
           zoneTarget: s.zoneTarget,
           detailText: s.detailText,
+          sportLabel: s.sportLabel,
+          workoutDayId: s.workoutDayId,
           date: sessionDate,
         }
       }),
@@ -70,7 +75,27 @@ export async function POST(
   const newSessions = await prisma.plannedSession.findMany({
     where: { weekId },
     orderBy: { dayOfWeek: 'asc' },
+    include: {
+      workoutDay: {
+        select: {
+          id: true, label: true,
+          exercises: { select: { exercise: { select: { name: true } }, sets: true, repsScheme: true } },
+        },
+      },
+    },
   })
 
-  return NextResponse.json({ ok: true, sessions: newSessions })
+  const mapped = newSessions.map(s => ({
+    ...s,
+    workoutDay: s.workoutDay ? {
+      ...s.workoutDay,
+      exercises: s.workoutDay.exercises.map(e => ({
+        name: e.exercise.name,
+        sets: e.sets,
+        repsScheme: e.repsScheme,
+      })),
+    } : null,
+  }))
+
+  return NextResponse.json({ ok: true, sessions: mapped })
 }

@@ -57,6 +57,7 @@ export default function UpgradeClient({ priceCOP, priceUSD, annualPriceCOP, annu
 
       try {
         const res = await fetch('/api/billing/status')
+        if (!res.ok) return
         const data = (await res.json()) as { tier: string }
 
         if (data.tier === 'PRO') {
@@ -98,8 +99,11 @@ export default function UpgradeClient({ priceCOP, priceUSD, annualPriceCOP, annu
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ billingCycle: cycle }),
       })
-      const data = (await res.json()) as { checkoutUrl?: string; error?: string }
-      if (!res.ok) throw new Error(data.error ?? 'Error al crear checkout.')
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({})) as { error?: string }
+        throw new Error(errBody.error ?? 'Error al crear checkout.')
+      }
+      const data = (await res.json()) as { checkoutUrl?: string }
       window.location.href = data.checkoutUrl!
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error inesperado.'

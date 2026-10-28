@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
+import { rateLimitAsync } from '@/lib/rate_limit'
 
 export async function POST(req: NextRequest) {
-  const athleteId = (await auth())?.user?.id
+  const session = await auth()
+  const athleteId = session?.user?.id
   if (!athleteId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const rl = await rateLimitAsync(`web-${athleteId}:gym-assign`, { limit: 30, windowMs: 60_000 })
+  if (!rl.allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  if (!session.user.features?.gym) {
+    return NextResponse.json({ error: 'Función no disponible en tu plan actual.', upgrade: '/upgrade' }, { status: 402 })
+  }
   const { templateId } = await req.json()
 
   if (!templateId) return NextResponse.json({ error: 'templateId requerido' }, { status: 400 })

@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import { createAthleteRoutineUseCase } from '@/domain/gym/create_athlete_routine.use_case'
+import { rateLimitAsync } from '@/lib/rate_limit'
 
 export async function GET(req: NextRequest) {
-  const athleteId = (await auth())?.user?.id
+  const session = await auth()
+  const athleteId = session?.user?.id
   if (!athleteId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  if (!session.user.features?.gym) {
+    return NextResponse.json({ error: 'Función no disponible en tu plan actual.', upgrade: '/upgrade' }, { status: 402 })
+  }
+
+  const rl = await rateLimitAsync(`web-${athleteId}:gym-routines`, { limit: 300, windowMs: 60_000 })
+  if (!rl.allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 
   const templates = await prisma.workoutTemplate.findMany({
     where: { athleteId },
@@ -23,8 +31,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const athleteId = (await auth())?.user?.id
+  const session = await auth()
+  const athleteId = session?.user?.id
   if (!athleteId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  if (!session.user.features?.gym) {
+    return NextResponse.json({ error: 'Función no disponible en tu plan actual.', upgrade: '/upgrade' }, { status: 402 })
+  }
 
   const body = await req.json()
 

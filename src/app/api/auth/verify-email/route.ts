@@ -12,14 +12,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/login?error=token-invalido', req.url))
   }
 
-  // Delete-and-check: if delete fails, another request already consumed the token
-  const record = await prisma.verificationToken.delete({ where: { token } }).catch(() => null)
+  // Find token first, check expiry, then delete atomically
+  const record = await prisma.verificationToken.findUnique({ where: { token } })
   if (!record) {
     return NextResponse.redirect(new URL('/login?error=token-invalido', req.url))
   }
 
   if (new Date() > record.expires) {
+    // Delete expired token but let user request a new one
+    await prisma.verificationToken.delete({ where: { token } }).catch(() => null)
     return NextResponse.redirect(new URL('/login?error=token-expirado', req.url))
+  }
+
+  // Delete consumed token (race-safe: if delete fails, another request consumed it)
+  const deleted = await prisma.verificationToken.delete({ where: { token } }).catch(() => null)
+  if (!deleted) {
+    return NextResponse.redirect(new URL('/login?error=token-invalido', req.url))
   }
 
   const user = await prisma.user.findUnique({

@@ -88,6 +88,7 @@ export default function AthleteTabs({
       if (!res.ok) setStatuses((p) => ({ ...p, [athleteId]: current }))
     } catch {
       setStatuses((p) => ({ ...p, [athleteId]: current }))
+      alert('Error al cambiar el estado del atleta.')
     } finally {
       setToggling((p) => ({ ...p, [athleteId]: false }))
     }

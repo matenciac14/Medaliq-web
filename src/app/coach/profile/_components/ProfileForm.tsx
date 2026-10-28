@@ -15,6 +15,9 @@ type CoachProfile = {
   yearsExp: number | null
   certifications: string[]
   isPublic: boolean
+  identification?: string | null
+  phoneWa?: string | null
+  showPhoneWa?: boolean
 }
 
 type Props = {
@@ -59,6 +62,9 @@ export default function ProfileForm({ initialProfile }: Props) {
   const [certInput, setCertInput] = useState('')
   const [certifications, setCertifications] = useState<string[]>(initialProfile?.certifications ?? [])
   const [isPublic, setIsPublic] = useState(initialProfile?.isPublic ?? false)
+  const [identification, setIdentification] = useState(initialProfile?.identification ?? '')
+  const [phoneWa, setPhoneWa] = useState(initialProfile?.phoneWa ?? '')
+  const [showPhoneWa, setShowPhoneWa] = useState(initialProfile?.showPhoneWa ?? false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -103,6 +109,9 @@ export default function ProfileForm({ initialProfile }: Props) {
           specialties,
           certifications,
           isPublic,
+          identification: identification || undefined,
+          phoneWa: phoneWa || undefined,
+          showPhoneWa,
         }),
       })
 
@@ -258,6 +267,41 @@ export default function ProfileForm({ initialProfile }: Props) {
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
           />
         </div>
+      </div>
+
+      {/* Cedula / ID */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Cedula / ID
+        </label>
+        <input
+          type="text"
+          value={identification}
+          onChange={e => setIdentification(e.target.value)}
+          placeholder="Numero de identificacion"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+        />
+      </div>
+
+      {/* WhatsApp personal (cuenta de usuario) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp personal</label>
+        <input
+          type="text"
+          value={phoneWa}
+          onChange={e => setPhoneWa(e.target.value)}
+          placeholder="+57 300 123 4567"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+        />
+        <label className="flex items-center gap-2 mt-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showPhoneWa}
+            onChange={e => setShowPhoneWa(e.target.checked)}
+            className="w-4 h-4 accent-[#ea580c]"
+          />
+          <span className="text-sm text-gray-600">Mostrar WhatsApp en mi perfil publico</span>
+        </label>
       </div>
 
       {/* Certificaciones */}

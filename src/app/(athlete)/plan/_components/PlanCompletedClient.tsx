@@ -5,8 +5,7 @@ import PlanCompletionCard from '../../_components/PlanCompletionCard'
 import PageTopBar from '../../_components/PageTopBar'
 import WeekDayStrip from '../../_components/WeekDayStrip'
 import type { WeekDayCell } from '../../_components/week_day_cells'
-
-const WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+import { WEEK_DAYS_SHORT } from '@/lib/constants/sessions'
 
 const PHASE_LABELS: Record<string, string> = {
   BASE: 'BASE', DEVELOPMENT: 'DESARRO', BUILD: 'DESARRO',
@@ -118,7 +117,7 @@ export default function PlanCompletedClient({
 
             return (
               <div key={dow} className="flex flex-col items-center gap-1">
-                <span className="text-xs font-semibold text-gray-400">{WEEK_DAYS[i]}</span>
+                <span className="text-xs font-semibold text-gray-400">{WEEK_DAYS_SHORT[i]}</span>
                 <div className={cn('w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold',
                   isDone && !isRest ? 'bg-[#22c55e] text-white' :
                   isRest ? 'bg-[#f1f5f9] text-gray-400 border border-[#cbd5e1]' :

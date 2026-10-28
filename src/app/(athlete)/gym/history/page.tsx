@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import { DAY_LABELS } from '@/lib/constants/sessions'
 import { translateMuscleGroup } from '@/lib/gym/labels'
+import { jsToOurDow } from '@/lib/core/date_utils'
 import { ChevronLeft, CheckCircle2, Dumbbell, Clock, Zap } from 'lucide-react'
 
 function formatDate(date: Date) {
@@ -145,8 +146,9 @@ export default async function GymHistoryPage({ searchParams }: { searchParams: P
           {/* ── MAIN: Lista de sesiones ─────────────────────────── */}
           <div className="space-y-3">
             {sessions.map((gs) => {
+              const normDow = jsToOurDow(gs.dayOfWeek)
               const workoutDay = gs.assignedWorkout?.template.days.find(
-                (d) => d.dayOfWeek === gs.dayOfWeek
+                (d) => d.dayOfWeek === normDow
               )
 
               const completedSets = gs.setLogs.filter((sl) => sl.completed).length
@@ -164,7 +166,7 @@ export default async function GymHistoryPage({ searchParams }: { searchParams: P
                   <div className={`w-3 h-3 rounded-full shrink-0 ${gs.completed ? 'bg-green-500' : 'bg-gray-300'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-gray-900 truncate">
-                      {workoutDay?.label ?? `${DAY_LABELS[gs.dayOfWeek]} — Sesión`}
+                      {workoutDay?.label ?? `${DAY_LABELS[normDow]} — Sesión`}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5 capitalize">{formatDate(gs.date)}</p>
                   </div>
@@ -200,8 +202,9 @@ export default async function GymHistoryPage({ searchParams }: { searchParams: P
               const selected = selectedSessionId ? sessions.find(s => s.id === selectedSessionId) : sessions[0]
               if (!selected) return null
 
+              const selectedNormDow = jsToOurDow(selected.dayOfWeek)
               const workoutDay = selected.assignedWorkout?.template.days.find(
-                (d) => d.dayOfWeek === selected.dayOfWeek
+                (d) => d.dayOfWeek === selectedNormDow
               )
 
               const exerciseGroups: Record<string, { name: string; sets: typeof selected.setLogs }> = {}
@@ -222,7 +225,7 @@ export default async function GymHistoryPage({ searchParams }: { searchParams: P
                   <div className="px-5 py-4 border-b border-gray-100">
                     <p className="font-bold text-[#1e3a5f] text-lg capitalize">{formatDate(selected.date)}</p>
                     <p className="text-sm text-gray-500 mt-0.5">
-                      {workoutDay?.label ?? `${DAY_LABELS[selected.dayOfWeek]} — Sesión`}
+                      {workoutDay?.label ?? `${DAY_LABELS[selectedNormDow]} — Sesión`}
                     </p>
                     <div className="grid grid-cols-4 gap-2 mt-3">
                       {selected.durationMin && (

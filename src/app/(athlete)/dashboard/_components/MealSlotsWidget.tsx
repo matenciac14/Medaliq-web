@@ -27,7 +27,8 @@ type Props = {
 }
 
 export default function MealSlotsWidget({ initialLogs }: Props = {}) {
-  const hasInitial = initialLogs !== undefined
+  // SSR always provides initialLogs — treat undefined and null both as "no initial data"
+  const hasInitial = initialLogs != null
 
   function buildSlots(logs: { mealType: string; kcal: number }[]): MealSlot[] {
     const kcalByType: Record<string, number> = {}
@@ -41,7 +42,7 @@ export default function MealSlotsWidget({ initialLogs }: Props = {}) {
   }
 
   const [slots, setSlots] = useState<MealSlot[]>(
-    hasInitial ? buildSlots(initialLogs) : SLOTS.map(s => ({ ...s, kcal: null }))
+    hasInitial ? buildSlots(initialLogs!) : SLOTS.map(s => ({ ...s, kcal: null }))
   )
   const [loading, setLoading] = useState(!hasInitial)
 

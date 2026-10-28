@@ -18,7 +18,7 @@ const DayExerciseSchema = z.object({
 })
 
 const DaySchema = z.object({
-  dayOfWeek: z.number().int().min(0).max(6),
+  dayOfWeek: z.number().int().min(1).max(7),
   label: z.string().max(100),
   muscleGroups: z.array(z.string().max(50)),
   isRestDay: z.boolean(),

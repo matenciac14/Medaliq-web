@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server'
 vi.mock('@/lib/db/prisma', () => ({
   prisma: {
     verificationToken: {
+      findUnique: vi.fn(),
       delete: vi.fn(),
     },
     user: {
@@ -34,29 +35,31 @@ describe('GET /api/auth/verify-email', () => {
     expect(res.headers.get('location')).toContain('error=token-invalido')
   })
 
-  it('redirige a error si el token no existe en DB (delete returns null)', async () => {
-    vi.mocked(prisma.verificationToken.delete).mockRejectedValue(new Error('not found'))
+  it('redirige a error si el token no existe en DB', async () => {
+    vi.mocked(prisma.verificationToken.findUnique).mockResolvedValue(null)
     const res = await GET(req('bad-token'))
     expect(res.headers.get('location')).toContain('error=token-invalido')
   })
 
   it('redirige a error si el token expiró', async () => {
-    vi.mocked(prisma.verificationToken.delete).mockResolvedValue({
+    vi.mocked(prisma.verificationToken.findUnique).mockResolvedValue({
       token: 'expired-token',
       identifier: 'ana@test.com',
       expires: new Date(Date.now() - 3600_000),
     } as any)
+    vi.mocked(prisma.verificationToken.delete).mockResolvedValue({} as any)
 
     const res = await GET(req('expired-token'))
     expect(res.headers.get('location')).toContain('error=token-expirado')
   })
 
   it('redirige a error si el usuario no existe', async () => {
-    vi.mocked(prisma.verificationToken.delete).mockResolvedValue({
+    vi.mocked(prisma.verificationToken.findUnique).mockResolvedValue({
       token: 'valid-token',
       identifier: 'ghost@test.com',
       expires: new Date(Date.now() + 3600_000),
     } as any)
+    vi.mocked(prisma.verificationToken.delete).mockResolvedValue({} as any)
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null)
 
     const res = await GET(req('valid-token'))
@@ -64,11 +67,12 @@ describe('GET /api/auth/verify-email', () => {
   })
 
   it('verifica email y redirige a /login?verified=1', async () => {
-    vi.mocked(prisma.verificationToken.delete).mockResolvedValue({
+    vi.mocked(prisma.verificationToken.findUnique).mockResolvedValue({
       token: 'valid-token',
       identifier: 'ana@test.com',
       expires: new Date(Date.now() + 3600_000),
     } as any)
+    vi.mocked(prisma.verificationToken.delete).mockResolvedValue({} as any)
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       id: 'u1',
       emailVerified: null,

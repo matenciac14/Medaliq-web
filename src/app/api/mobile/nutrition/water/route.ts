@@ -53,12 +53,12 @@ export async function POST(req: NextRequest) {
     resolvedTz = u?.timezone ?? undefined
   }
   const today = todayInTz(resolvedTz)
-  const dateStr = today.toISOString()
+  const dateStr = today.toISOString().split('T')[0]
 
   // Atomic upsert — avoids read-then-write race condition on parallel taps
   const result = await prisma.$queryRaw<{ ml_logged: number }[]>`
     INSERT INTO "WaterLog" ("id", "userId", "date", "mlLogged")
-    VALUES (gen_random_uuid(), ${userId}, ${dateStr}::timestamp, GREATEST(0, ${delta}))
+    VALUES (gen_random_uuid(), ${userId}, ${dateStr}::date, GREATEST(0, ${delta}))
     ON CONFLICT ("userId", "date")
     DO UPDATE SET "mlLogged" = GREATEST(0, "WaterLog"."mlLogged" + ${delta})
     RETURNING "mlLogged" AS ml_logged

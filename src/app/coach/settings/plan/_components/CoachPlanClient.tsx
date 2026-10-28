@@ -83,6 +83,7 @@ export default function CoachPlanClient({
 
       try {
         const res  = await fetch('/api/billing/status')
+        if (!res.ok) return
         const data = await res.json() as { coachTier: string }
 
         if (data.coachTier !== currentTier) {
@@ -124,8 +125,11 @@ export default function CoachPlanClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetTier }),
       })
-      const data = await res.json() as { checkoutUrl?: string; error?: string }
-      if (!res.ok) throw new Error(data.error ?? 'Error al crear checkout.')
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({})) as { error?: string }
+        throw new Error(errBody.error ?? 'Error al crear checkout.')
+      }
+      const data = await res.json() as { checkoutUrl?: string }
       window.location.href = data.checkoutUrl!
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error inesperado.'

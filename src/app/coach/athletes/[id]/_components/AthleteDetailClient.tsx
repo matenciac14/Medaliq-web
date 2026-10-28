@@ -316,14 +316,19 @@ export default function AthleteDetailClient({
   // Reset password
   const [resettingPwd, setResettingPwd] = useState(false)
   const [resetLink, setResetLink] = useState<string | null>(null)
+  const [resetPwdError, setResetPwdError] = useState<string | null>(null)
   const [pwdCopied, setPwdCopied] = useState(false)
 
   async function handleResetPassword() {
-    setResettingPwd(true); setResetLink(null)
+    setResettingPwd(true); setResetLink(null); setResetPwdError(null)
     try {
       const res = await fetch(`/api/coach/athletes/${athleteId}/reset-password`, { method: 'POST' })
       const data = await res.json()
-      if (res.ok) setResetLink(data.resetLink)
+      if (res.ok) {
+        setResetLink(data.resetLink)
+      } else {
+        setResetPwdError(data.error ?? 'Error al generar el link.')
+      }
     } finally { setResettingPwd(false) }
   }
 
@@ -345,30 +350,39 @@ export default function AthleteDetailClient({
   async function handleSaveCoachNotes() {
     setSavingCoachNotes(true); setCoachNotesSaved(false)
     try {
-      await fetch(`/api/coach/athletes/${athleteId}/config`, {
+      const res = await fetch(`/api/coach/athletes/${athleteId}/config`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ coachGoal: coachGoal.trim() || null, privateNotes: privateNotes.trim() || null }),
       })
-      setCoachNotesSaved(true)
-      setTimeout(() => setCoachNotesSaved(false), 2500)
+      if (res.ok) {
+        setCoachNotesSaved(true)
+        setTimeout(() => setCoachNotesSaved(false), 2500)
+      } else {
+        alert('Error al guardar las notas.')
+      }
     } finally { setSavingCoachNotes(false) }
   }
 
   // Athlete status
   const [athleteStatus, setAthleteStatus] = useState<AthleteStatus>(initialStatus)
   const [togglingStatus, setTogglingStatus] = useState(false)
+  const [statusError, setStatusError] = useState<string | null>(null)
   // activated se deriva del status del atleta — no de features individuales
   const activated = athleteStatus === 'ACTIVE'
 
   async function handleToggleStatus() {
     const next: AthleteStatus = athleteStatus === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'
-    setTogglingStatus(true)
+    setTogglingStatus(true); setStatusError(null)
     try {
       const res = await fetch(`/api/coach/athletes/${athleteId}/status`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: next }),
       })
-      if (res.ok) setAthleteStatus(next)
+      if (res.ok) {
+        setAthleteStatus(next)
+      } else {
+        setStatusError('Error al cambiar el estado del atleta.')
+      }
     } finally { setTogglingStatus(false) }
   }
 
@@ -443,12 +457,16 @@ export default function AthleteDetailClient({
   async function handleSaveSession(sessionId: string) {
     setSavingSession(true)
     try {
-      await fetch(`/api/coach/sessions/${sessionId}/edit`, {
+      const res = await fetch(`/api/coach/sessions/${sessionId}/edit`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sessionDraft),
       })
-      setEditingSession(null)
-      router.refresh()
+      if (res.ok) {
+        setEditingSession(null)
+        router.refresh()
+      } else {
+        alert('Error al guardar la sesión.')
+      }
     } finally { setSavingSession(false) }
   }
 
@@ -507,11 +525,13 @@ export default function AthleteDetailClient({
   async function handleSaveNote(sessionId: string) {
     setSavingNotes((prev) => ({ ...prev, [sessionId]: true }))
     try {
-      await fetch(`/api/coach/sessions/${sessionId}/note`, {
+      const res = await fetch(`/api/coach/sessions/${sessionId}/note`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ note: notes[sessionId] ?? '' }),
       })
-      setSavedNotes((prev) => ({ ...prev, [sessionId]: true }))
+      if (res.ok) {
+        setSavedNotes((prev) => ({ ...prev, [sessionId]: true }))
+      }
     } finally { setSavingNotes((prev) => ({ ...prev, [sessionId]: false })) }
   }
 
@@ -593,13 +613,13 @@ export default function AthleteDetailClient({
   })()
 
   function applyPhaseTargets() {
-    if (!nutritionPlan || !currentPhase) return
+    if (!nutritionDraft || !currentPhase) return
     const delta = PHASE_KCAL_DELTA[currentPhase]?.delta ?? 0
     setNutritionDraft({
-      ...nutritionPlan,
-      targetKcalHard: nutritionPlan.tdee + delta + 300,
-      targetKcalEasy: nutritionPlan.tdee + delta,
-      targetKcalRest: nutritionPlan.tdee + delta - 200,
+      ...nutritionDraft,
+      targetKcalHard: nutritionDraft.tdee + delta + 300,
+      targetKcalEasy: nutritionDraft.tdee + delta,
+      targetKcalRest: nutritionDraft.tdee + delta - 200,
     })
     setEditingNutrition(true)
   }
@@ -657,6 +677,7 @@ export default function AthleteDetailClient({
           >
             {togglingStatus ? '...' : athleteStatus === 'ACTIVE' ? 'Pausar' : 'Reactivar'}
           </button>
+          {statusError && <p className="text-xs text-red-500">{statusError}</p>}
           <p className="text-sm" style={{ color: '#8c99a6' }}>
             {athlete.email} · Cliente desde {new Date(athlete.createdAt).toLocaleDateString('es', { month: 'short', year: 'numeric' })}
           </p>

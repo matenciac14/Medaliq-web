@@ -74,6 +74,7 @@ export default function AthletePlanClient({
 
       try {
         const res  = await fetch('/api/billing/status')
+        if (!res.ok) return
         const data = await res.json() as { tier: string }
 
         if (data.tier === 'PRO' && tier !== 'PRO') {

@@ -24,7 +24,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!allowed) return NextResponse.json({ error: 'Demasiadas solicitudes.' }, { status: 429 })
 
   const { id } = await params
-  const rawBody = await req.json()
+  const rawBody = await req.json().catch(() => null)
   const parsed  = bodySchema.safeParse(rawBody)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Body inválido.' }, { status: 400 })
 

@@ -40,6 +40,7 @@ export async function GET(
                       id: true, name: true, category: true,
                       kcalPer100g: true, proteinPer100g: true,
                       carbsPer100g: true, fatPer100g: true,
+                      servingG: true, servingLabel: true,
                     },
                   },
                 },
@@ -77,7 +78,8 @@ export async function PATCH(
     return NextResponse.json({ error: 'Template no encontrado.' }, { status: 404 })
   }
 
-  const body = await req.json() as { name?: string; description?: string; goal?: string }
+  const body = await req.json().catch(() => null) as { name?: string; description?: string; goal?: string } | null
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
 
   const updated = await prisma.nutritionTemplate.update({
     where: { id: templateId },

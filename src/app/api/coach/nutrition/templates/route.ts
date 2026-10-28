@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
   const { allowed } = await rateLimitAsync(`coach-${session.user.id}:nutrition-templates-post`, { limit: 60, windowMs: 60_000 })
   if (!allowed) return NextResponse.json({ error: 'Demasiadas solicitudes' }, { status: 429 })
 
-  const body = await req.json() as { name?: string; description?: string; goal?: string }
+  const body = await req.json().catch(() => null) as { name?: string; description?: string; goal?: string } | null
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   const name = body.name?.trim()
   if (!name) {
     return NextResponse.json({ error: 'name es requerido.' }, { status: 400 })

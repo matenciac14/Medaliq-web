@@ -102,6 +102,7 @@ function FoodSearchModal({
     if (q.length < 2) { setResults([]); return }
     setLoading(true)
     const res = await fetch(`/api/athlete/nutrition/foods?q=${encodeURIComponent(q)}`)
+    if (!res.ok) { setLoading(false); return }
     const data = await res.json()
     setResults(data.foods ?? [])
     setLoading(false)
@@ -330,8 +331,9 @@ export default function NutritionBuilderClient({
   const [addingMeal, setAddingMeal] = useState<{ dayId: string; mealType: string } | null>(null)
   const [showAssign, setShowAssign] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [builderError, setBuilderError] = useState<string | null>(null)
 
-  const activeDay = template.days.find((d) => d.dayType === activeDayType)!
+  const activeDay = template.days.find((d) => d.dayType === activeDayType) ?? template.days[0]
   const totals = dayTotals(activeDay)
 
   // Comidas ordenadas + comidas disponibles para agregar
@@ -379,6 +381,7 @@ export default function NutritionBuilderClient({
     if (!addingMeal) return
     const macros = calcMacros(food, grams)
     startTransition(async () => {
+      setBuilderError(null)
       const res = await fetch(`/api/coach/nutrition/templates/${template.id}/meals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -389,7 +392,11 @@ export default function NutritionBuilderClient({
           grams,
         }),
       })
-      if (!res.ok) return
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        setBuilderError(err?.error ?? 'Error al agregar el alimento.')
+        return
+      }
       const { item } = await res.json()
       addItemToState(activeDayType, addingMeal.mealType, { ...item, food })
       setAddingMeal(null)
@@ -398,12 +405,17 @@ export default function NutritionBuilderClient({
 
   async function handleRemoveItem(itemId: string) {
     startTransition(async () => {
+      setBuilderError(null)
       const res = await fetch(`/api/coach/nutrition/templates/${template.id}/meals`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId }),
       })
-      if (!res.ok) return
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        setBuilderError(err?.error ?? 'Error al eliminar el alimento.')
+        return
+      }
       removeItemFromState(activeDayType, itemId)
     })
   }
@@ -434,12 +446,21 @@ export default function NutritionBuilderClient({
         </button>
       </header>
 
+      {/* Error banner */}
+      {builderError && (
+        <div className="mx-4 mt-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {builderError}
+        </div>
+      )}
+
       {/* Day tabs */}
       <div className="bg-white border-b border-gray-200 px-4 shrink-0">
         <div className="flex gap-1">
           {(['HARD', 'EASY', 'REST'] as const).map((dt) => {
             const c = DAY_CONFIG[dt]
-            const t = dayTotals(template.days.find((d) => d.dayType === dt)!)
+            const dayForType = template.days.find((d) => d.dayType === dt)
+            if (!dayForType) return null
+            const t = dayTotals(dayForType)
             const active = activeDayType === dt
             return (
               <button
@@ -481,7 +502,8 @@ export default function NutritionBuilderClient({
 
           {/* Comidas */}
           {MEAL_ORDER.filter((mt) => usedMealTypes.has(mt)).map((mealType) => {
-            const meal = activeDay.meals.find((m) => m.mealType === mealType)!
+            const meal = activeDay.meals.find((m) => m.mealType === mealType)
+            if (!meal) return null
             const mealTotals = meal.items.reduce(
               (acc, i) => ({ kcal: acc.kcal + i.kcal, proteinG: acc.proteinG + i.proteinG, carbsG: acc.carbsG + i.carbsG, fatG: acc.fatG + i.fatG }),
               { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 }

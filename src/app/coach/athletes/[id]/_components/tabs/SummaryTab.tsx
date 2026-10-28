@@ -334,11 +334,6 @@ export default function ResumenTab({
                 })}
               </tbody>
             </table>
-            <div className="text-right mt-3">
-              <span className="text-xs font-medium cursor-pointer" style={{ color: '#808c99' }}>
-                Ver historial completo →
-              </span>
-            </div>
           </>
         )}
       </div>

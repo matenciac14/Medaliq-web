@@ -27,7 +27,10 @@ async function verifyGoogleToken(idToken: string): Promise<GoogleTokenInfo> {
     process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
   ].filter(Boolean)
 
-  if (validAudiences.length > 0 && !validAudiences.includes(data.aud)) {
+  if (validAudiences.length === 0) {
+    throw new Error('Google client IDs no configurados en el servidor.')
+  }
+  if (!validAudiences.includes(data.aud)) {
     throw new Error('Token no corresponde a esta aplicación.')
   }
 
@@ -41,15 +44,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
+    const { allowed: ipAllowed } = await rateLimitAsync(`mobile-google-ip:${ip}`, { limit: 20, windowMs: 60_000 })
+    if (!ipAllowed) return NextResponse.json({ error: 'Demasiados intentos. Intenta en un minuto.' }, { status: 429 })
+
     const { idToken } = await req.json()
     if (!idToken) {
       return NextResponse.json({ error: 'idToken requerido.' }, { status: 400 })
     }
 
     const googleUser = await verifyGoogleToken(idToken)
-
-    const { allowed } = await rateLimitAsync(`mobile-google-${googleUser.email}`, { limit: 20, windowMs: 60_000 })
-    if (!allowed) return NextResponse.json({ error: 'Demasiados intentos. Intenta en un minuto.' }, { status: 429 })
 
     if (googleUser.email_verified !== 'true') {
       return NextResponse.json({ error: 'Correo de Google no verificado.' }, { status: 400 })
@@ -87,6 +91,12 @@ export async function POST(req: NextRequest) {
       needsRoleSelection = true
     }
 
+    // Block suspended/blocked users — even if needsRoleSelection is pending
+    if (dbUser.status !== 'ACTIVE') {
+      const msg = dbUser.status === 'BLOCKED' ? 'Tu cuenta ha sido bloqueada.' : 'Tu cuenta está suspendida.'
+      return NextResponse.json({ error: msg }, { status: 403 })
+    }
+
     let payload
     if (needsRoleSelection) {
       payload = {
@@ -105,7 +115,7 @@ export async function POST(req: NextRequest) {
         features: DEFAULT_USER_CONFIG.features,
       }
     } else {
-      const [coachRelation, subscription] = await Promise.all([
+      const [coachRelation, subscription, healthProfile] = await Promise.all([
         prisma.coachAthlete.findFirst({
           where: { athleteId: dbUser.id, status: 'ACTIVE' },
           select: { id: true },
@@ -114,9 +124,17 @@ export async function POST(req: NextRequest) {
           where: { userId: dbUser.id },
           select: { tier: true, trialEndsAt: true },
         }),
+        prisma.healthProfile.findUnique({
+          where: { userId: dbUser.id },
+          select: { sportGoal: true },
+        }),
       ])
+      const sport = healthProfile?.sportGoal === 'STRENGTH_TRAINING' ? 'STRENGTH'
+        : healthProfile?.sportGoal === 'BODY_RECOMPOSITION' ? 'BOTH'
+        : 'RUNNING'
       payload = buildMobileTokenPayload(dbUser, {
         isB2B: !!coachRelation,
+        sport,
         subscriptionTier: subscription?.tier,
         trialEndsAt: subscription?.trialEndsAt,
       })
@@ -132,12 +150,14 @@ export async function POST(req: NextRequest) {
         email: payload.email,
         name: payload.name,
         role: payload.role,
+        status: payload.status,
         onboardingCompleted: payload.onboardingCompleted,
         activated: payload.activated,
         isB2B: payload.isB2B,
         userPlan: payload.userPlan,
         profileComplete: payload.profileComplete,
         features: payload.features,
+        sport: payload.sport,
       },
     })
   } catch (err: unknown) {
