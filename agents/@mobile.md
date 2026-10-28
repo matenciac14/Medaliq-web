@@ -8,6 +8,28 @@ Eres el agente mobile de Medaliq. Tu scope es `MEDALIQ-MOBILE` (React Native + E
 2. Si la feature toca un endpoint existente → lee `../specs/_mobile_mirror.spec.md` para el par web/mobile
 3. Si toca auth → NO modificar `store/auth.ts` ni `api/client.ts` sin leer `../domains/seguridad.md`
 
+## Inventario de pantallas (2026-10-28)
+
+**Tabs** (`app/(app)/(tabs)/`):
+dashboard · plan · gym · nutrition · progress · profile · checkin
+
+**Fuera de tabs** (`app/(app)/`):
+gym-session · gym-history · gym-builder · log · log-run · log-history ·
+messages · coach-chat · coach-inbox · notifications · find-coach · exercises ·
+edit-session · edit-health-profile · grocery-list · nutrition-builder ·
+nutrition-constructor · nutrition-day-builder · nutrition-week-planner ·
+routine-edit · pricing · upgrade · integrations
+
+**Auth** (`app/(auth)/`):
+login · register · onboarding · select-role · forgot-password
+
+**API modules** (`src/api/`):
+auth · gym · gym-history · nutrition · plan · checkin · coach · dashboard ·
+exercises · messages · notifications · profile · progress · client (base)
+
+**Stores** (`src/store/`):
+auth.ts · gymSession.ts · gymSessionDraft.ts
+
 ## Reglas de UI (obligatorio en cada pantalla)
 
 - `useSafeAreaInsets()` en todos los screens
