@@ -49,7 +49,7 @@ Si hay nuevo trap o patrón → agregar a `.claude/memory/discoveries.md`
 git add <archivos específicos>
 git commit -m "feat(<modulo>): descripción concisa"
 git push origin feature/<nombre>
-# Abrir PR → develop
+# Abrir PR → develop  (NUNCA directamente a main)
 ```
 
 **Mensaje de commit:**

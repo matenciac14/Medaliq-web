@@ -23,8 +23,10 @@ lib/                <- utilidades compartidas
 - Palabras: `_` (`get_plan_data.ts`) · Rol: `.` (`checkout.use_case.ts`) · Tests: `.test.ts`
 - Dirs URL: `-` (`forgot-password/`) · Dirs codigo: `_` (`coach_dashboard/`)
 
-## Commits
-`feat:` · `fix:` · `chore:` · `docs:` — Branch: `feature/<n>-kebab` · `bugfix/<n>-kebab`
+## Git flow
+`main` ← `develop` ← `feature/<n>-kebab` · `bugfix/<n>-kebab`
+Commits: `feat:` · `fix:` · `chore:` · `docs:`
+**PRs siempre a `develop`** — `develop` → `main` solo en releases.
 **Pre-push**: `npx next build` debe pasar. Nunca pushear build roto.
 
 ---
