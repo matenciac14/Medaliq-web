@@ -59,7 +59,7 @@ const ADHERENCE_DAYS = [
   { label: 'Jue', dow: 4 },
   { label: 'Vie', dow: 5 },
   { label: 'Sab', dow: 6 },
-  { label: 'Dom', dow: 0 },
+  { label: 'Dom', dow: 7 },
 ] as const
 
 export default function CheckInClient({
@@ -113,11 +113,11 @@ export default function CheckInClient({
       weightKg: weightKg ? Number(weightKg) : undefined,
       hrResting: hrResting ? Number(hrResting) : undefined,
       sleepHours: sleepHours > 0 ? sleepHours : undefined,
-      hardestRpe: hardestRpe || 5,
+      hardestRpe: hardestRpe ?? 5,
       painLevel: painLevel > 0 ? painLevel : undefined,
-      energyLevel: energyLevel || 5,
-      stressLevel: stressLevel || undefined,
-      motivationLevel: motivationLevel || undefined,
+      energyLevel: energyLevel ?? 5,
+      stressLevel: stressLevel !== null && stressLevel !== undefined ? stressLevel : undefined,
+      motivationLevel: motivationLevel !== null && motivationLevel !== undefined ? motivationLevel : undefined,
       nutritionAdherencePct: hasNutrition && nutritionAdherence > 0 ? nutritionAdherence * 10 : undefined,
       notes: notes || undefined,
     }

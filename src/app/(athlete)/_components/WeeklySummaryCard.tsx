@@ -9,10 +9,6 @@ type Props = {
   avgKcalPerDay: number | null
   currentVolume: number | null
   volumeDeltaPct: number | null
-  variant?: 'default' | 'free'
-  // Legacy — kept for caller compatibility
-  lastCheckIn?: { hardestSessionRpe: number | null; energyLevel: number | null; weightKg: number | null } | null
-  formCheckInDate?: string | null
 }
 
 export default function WeeklySummaryCard({
@@ -61,7 +57,7 @@ export default function WeeklySummaryCard({
         <div className="pl-4">
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Carga Semanal</p>
           <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-2xl font-black text-[#1e3a5f] leading-none">{currentVolume ?? 0} km</span>
+            <span className="text-2xl font-black text-[#1e3a5f] leading-none">{currentVolume != null ? `${currentVolume} km` : '—'}</span>
             {volumeDeltaPct != null && (
               <span className={`text-xs font-semibold ${volumeDeltaPct >= 0 ? 'text-[#22c55e]' : 'text-red-500'}`}>
                 {volumeDeltaPct >= 0 ? '\u2191' : '\u2193'} {Math.abs(volumeDeltaPct)}%

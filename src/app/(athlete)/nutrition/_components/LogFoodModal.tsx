@@ -154,12 +154,12 @@ export default function LogFoodModal({ foods, date, onClose }: Props) {
     if (isNaN(g) || g <= 0) return
     setSubmitting(true)
     try {
-      await fetch('/api/athlete/nutrition/log', {
+      const res = await fetch('/api/athlete/nutrition/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ foodId: selected.id, grams: g, mealType, date }),
       })
-      router.refresh()
+      if (!res.ok) return
       handleClose()
     } finally {
       setSubmitting(false)
@@ -169,7 +169,7 @@ export default function LogFoodModal({ foods, date, onClose }: Props) {
   async function handleLogTemplate(template: MealTemplate) {
     setLoggingTemplate(template.id)
     try {
-      await Promise.all(
+      const results = await Promise.all(
         template.items.map(item =>
           fetch('/api/athlete/nutrition/log', {
             method: 'POST',
@@ -178,7 +178,7 @@ export default function LogFoodModal({ foods, date, onClose }: Props) {
           })
         )
       )
-      router.refresh()
+      if (results.some(r => !r.ok)) return
       handleClose()
     } finally {
       setLoggingTemplate(null)
@@ -214,7 +214,7 @@ export default function LogFoodModal({ foods, date, onClose }: Props) {
     if (!name.trim() || !kcalPer100g || !proteinPer100g || !carbsPer100g || !fatPer100g) return
     setProposing(true)
     try {
-      await fetch('/api/athlete/nutrition/foods/propose', {
+      const res = await fetch('/api/athlete/nutrition/foods/propose', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -228,6 +228,7 @@ export default function LogFoodModal({ foods, date, onClose }: Props) {
           notes:   proposeForm.notes.trim() || undefined,
         }),
       })
+      if (!res.ok) return
       setProposeSuccess(true)
     } finally {
       setProposing(false)
@@ -235,8 +236,8 @@ export default function LogFoodModal({ foods, date, onClose }: Props) {
   }
 
   async function handleDeleteTemplate(id: string) {
-    await fetch(`/api/athlete/nutrition/meal-templates/${id}`, { method: 'DELETE' })
-    setTemplates(prev => prev.filter(t => t.id !== id))
+    const res = await fetch(`/api/athlete/nutrition/meal-templates/${id}`, { method: 'DELETE' })
+    if (res.ok) setTemplates(prev => prev.filter(t => t.id !== id))
   }
 
   function handleClose() {

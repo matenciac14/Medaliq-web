@@ -183,7 +183,7 @@ function CompleteModal({
           <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 size={28} className="text-green-600" />
           </div>
-          <h2 className="text-xl font-bold text-[#1e3a5f]">Sesion completada</h2>
+          <h2 className="text-xl font-bold text-[#1e3a5f]">Sesión completada</h2>
           <p className="text-sm text-gray-500 mt-0.5">¿Cómo fue tu sesión de hoy?</p>
         </div>
 

@@ -277,10 +277,10 @@ export default async function NutritionPage() {
           targetKcalHard: hard.kcal,
           targetKcalEasy: easy.kcal,
           targetKcalRest: rest.kcal,
-          proteinG: hard.proteinG,
+          proteinG: easy.proteinG,
           carbsHardG: hard.carbsG,
           carbsEasyG: easy.carbsG,
-          fatG: hard.fatG,
+          fatG: easy.fatG,
         }
       })()
     : null
@@ -317,11 +317,17 @@ export default async function NutritionPage() {
 
     let daysHit = 0
     let totalDays = 0
-    for (const [day, kcal] of Object.entries(kcalByDay)) {
-      const intensity = intensityByDateKey.get(day) ?? 'REST'
+    // Iterate all 7 days of the week, not just days with logs
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(mondayThisWeek)
+      d.setUTCDate(mondayThisWeek.getUTCDate() + i)
+      const dayKey = d.toISOString().slice(0, 10)
+      if (d > todayStart) break // don't count future days
+      const intensity = intensityByDateKey.get(dayKey) ?? 'REST'
       const target = getDailyNutritionTarget(intensity, effectiveNutritionPlan)
       if (target.kcal > 0) {
         totalDays++
+        const kcal = kcalByDay[dayKey] ?? 0
         if (kcal >= target.kcal * 0.9) daysHit++
       }
     }
@@ -362,7 +368,7 @@ export default async function NutritionPage() {
 
   // NUT-F-02: datos del menú semanal (días de la semana con dayType del plan)
   const weekMenuDays = Array.from({ length: 7 }, (_, i) => {
-    const dow = i  // 0=Lun..6=Dom (nuestro sistema: jsToOurDow offset)
+    const dow = i + 1  // 1=Lun..7=Dom (sistema base-1)
     const session = weekSessions.find(s => s.dayOfWeek === dow)
     const dayType = session && session.type !== 'DESCANSO'
       ? intensityToDayType(session.intensity)

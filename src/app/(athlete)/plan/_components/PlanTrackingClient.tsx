@@ -209,7 +209,7 @@ export default function PlanTrackingClient({
             const hasActivity = !!(day.sport?.done || day.gym || day.freeRun)
             const isToday = isCurrentWeek && day.dow === todayDow
             const isSelected = day.dow === selectedDow
-            const isFuture = isCurrentWeek ? day.dow > todayDow : weekOffset > 0
+            const isFuture = isCurrentWeek ? day.dow > todayDow : false
 
             const barColor = hasActivity ? 'bg-green-500' : isToday || isSelected ? 'bg-[#ea580c]' : isFuture ? 'bg-[#ea580c]/30' : 'bg-gray-200'
             const cardBg = isToday

@@ -33,12 +33,15 @@ interface Props {
   coachName?: string | null
   /** Pre-computed calendar week from server — eliminates client-side fetch flash */
   initialCalendarWeek?: CalendarWeek | null
+  /** Server-computed today day-of-week (1=Mon…7=Sun) — avoids browser timezone mismatch */
+  serverTodayDow?: number
 }
 
-export default function DashboardCalendarStrip({ weekOffset, dashboardMode = 'FREE', firstName = '', weekLabel = '', mobileCount = '', isB2B = false, planPhase = null, planWeekNum = null, planTotalWeeks = null, coachName = null, initialCalendarWeek = null }: Props) {
+export default function DashboardCalendarStrip({ weekOffset, dashboardMode = 'FREE', firstName = '', weekLabel = '', mobileCount = '', isB2B = false, planPhase = null, planWeekNum = null, planTotalWeeks = null, coachName = null, initialCalendarWeek = null, serverTodayDow }: Props) {
   const router = useRouter()
   const pathname = usePathname()
-  const todayWeekIdx = jsToWeekIdx(new Date().getDay())
+  // Use server-provided DOW when available to avoid browser timezone mismatch
+  const todayWeekIdx = serverTodayDow !== undefined ? serverTodayDow - 1 : jsToWeekIdx(new Date().getDay())
   const isCurrentWeek = weekOffset === 0
 
   function navigateWeek(delta: number) {
@@ -478,7 +481,7 @@ function MobileSelectedDayCard({ day, isToday }: { day: CalendarDay; isToday: bo
           </span>
         </div>
         <p className="text-sm font-semibold text-gray-900">{sessionName}</p>
-        {detailText && (
+        {detailText && detailText !== sessionName && (
           <p className="text-xs text-gray-500">{detailText}</p>
         )}
         <div className="pt-2">
