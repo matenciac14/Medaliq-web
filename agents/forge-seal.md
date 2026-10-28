@@ -29,11 +29,16 @@ En `../domains/<modulo>.md`:
 - [ ] Si cambió lo que el sistema puede hacer → actualizar el domain doc
 - [ ] Si hay nuevo flujo cross-actor → actualizar `flujos-cruzados.md`
 
-### 4. Tests
+### 4. Verificación final
+
+Correr en este orden y confirmar que todo pasa:
+
+```bash
+pnpm verify   # tsc + vitest + next build — los tres deben pasar
+```
 
 - [ ] Tests para lógica nueva en domain/ (funciones puras)
-- [ ] Tests para service con mock-repo si hay lógica de negocio compleja
-- [ ] `pnpm test` pasa sin regresiones
+- [ ] `pnpm verify` pasa sin errores
 
 ### 5. Memoria
 
