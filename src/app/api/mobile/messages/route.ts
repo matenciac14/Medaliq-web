@@ -47,7 +47,8 @@ export async function POST(req: NextRequest) {
   const { allowed } = await rateLimitAsync(`mobile-${mobile.id}:messages-post`, { limit: 100, windowMs: 60_000 })
   if (!allowed) return NextResponse.json({ error: 'Demasiadas solicitudes. Intenta en un minuto.' }, { status: 429 })
 
-  const body = await req.json()
+  const body = await req.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   const { toId, content } = body
   if (!toId || !content?.trim()) return NextResponse.json({ error: 'toId y content requeridos' }, { status: 400 })
 

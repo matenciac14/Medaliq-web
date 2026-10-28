@@ -24,15 +24,17 @@ export async function GET(req: NextRequest) {
       exerciseName: true,
       weightKg: true,
       repsCompleted: true,
+      workoutExercise: { select: { exercise: { select: { name: true } } } },
     },
   })
 
   const prMap = new Map<string, number>()
   for (const sl of setLogs) {
-    if (!sl.exerciseName || !sl.weightKg || !sl.repsCompleted) continue
+    const name = sl.exerciseName ?? sl.workoutExercise?.exercise.name
+    if (!name || !sl.weightKg || !sl.repsCompleted) continue
     const oneRm = epley(sl.weightKg, sl.repsCompleted)
-    const existing = prMap.get(sl.exerciseName) ?? 0
-    if (oneRm > existing) prMap.set(sl.exerciseName, oneRm)
+    const existing = prMap.get(name) ?? 0
+    if (oneRm > existing) prMap.set(name, oneRm)
   }
 
   const prs = [...prMap.entries()].map(([exerciseName, estimatedOneRM]) => ({ exerciseName, estimatedOneRM }))

@@ -4,6 +4,7 @@ import { getMobileUser } from '@/lib/auth/mobile_auth'
 import { rateLimitAsync } from '@/lib/rate_limit'
 import { getDailyNutritionTarget } from '@/lib/nutrition/daily_target'
 import { requireFeature } from '@/lib/guards/feature_gate'
+import { getWeekMonday } from '@/lib/core/date_utils'
 
 export async function GET(req: NextRequest) {
   const mobile = await getMobileUser(req)
@@ -15,13 +16,9 @@ export async function GET(req: NextRequest) {
 
   const userId = mobile.id
 
-  // ISO week: Monday 00:00 UTC → Sunday 23:59 UTC
-  const now = new Date()
-  const day = now.getUTCDay() // 0=Sun, 1=Mon, ...
-  const diffToMonday = (day === 0 ? -6 : 1 - day)
-  const weekStart = new Date(now)
-  weekStart.setUTCDate(now.getUTCDate() + diffToMonday)
-  weekStart.setUTCHours(0, 0, 0, 0)
+  // Week boundaries using user timezone
+  const tz = req.nextUrl.searchParams.get('tz') || (await prisma.user.findUnique({ where: { id: userId }, select: { timezone: true } }))?.timezone || undefined
+  const weekStart = getWeekMonday(0, tz)
   const weekEnd = new Date(weekStart)
   weekEnd.setUTCDate(weekStart.getUTCDate() + 6)
   weekEnd.setUTCHours(23, 59, 59, 999)
@@ -37,7 +34,17 @@ export async function GET(req: NextRequest) {
     prisma.trainingPlan.findFirst({
       where: { userId, status: { in: ['ACTIVE', 'COMPLETED'] } },
       orderBy: { createdAt: 'desc' },
-      select: { id: true },
+      select: {
+        id: true,
+        weeks: {
+          select: {
+            sessions: {
+              where: { date: { gte: weekStart, lte: weekEnd } },
+              select: { date: true, intensity: true },
+            },
+          },
+        },
+      },
     }),
   ])
 
@@ -55,14 +62,12 @@ export async function GET(req: NextRequest) {
   const avgKcal = daysWithLog > 0 ? Math.round(totalKcal / daysWithLog) : 0
 
   // Per-day target: use planned session intensity when available
-  let intensityByDate = new Map<string, string>()
+  const intensityByDate = new Map<string, string>()
   if (activePlan) {
-    const plannedSessions = await prisma.plannedSession.findMany({
-      where: { week: { planId: activePlan.id }, date: { gte: weekStart, lte: weekEnd } },
-      select: { date: true, intensity: true },
-    })
-    for (const s of plannedSessions) {
-      intensityByDate.set(s.date.toISOString().split('T')[0], s.intensity)
+    for (const w of activePlan.weeks) {
+      for (const s of w.sessions) {
+        intensityByDate.set(s.date.toISOString().split('T')[0], s.intensity)
+      }
     }
   }
 

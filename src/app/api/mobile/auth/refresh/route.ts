@@ -18,6 +18,11 @@ export async function POST(req: NextRequest) {
   ])
   if (!user) return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
 
+  if (user.status !== 'ACTIVE') {
+    const message = user.status === 'BLOCKED' ? 'Tu cuenta ha sido bloqueada.' : 'Tu cuenta está suspendida.'
+    return NextResponse.json({ error: message }, { status: 403 })
+  }
+
   const sport = healthProfile?.sportGoal === 'STRENGTH_TRAINING' ? 'STRENGTH'
     : healthProfile?.sportGoal === 'BODY_RECOMPOSITION' ? 'BOTH'
     : 'RUNNING'

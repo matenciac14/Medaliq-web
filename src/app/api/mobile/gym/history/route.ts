@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma'
 import { getMobileUser } from '@/lib/auth/mobile_auth'
 import { rateLimitAsync } from '@/lib/rate_limit'
 import { requireFeature } from '@/lib/guards/feature_gate'
+import { todayInTz } from '@/lib/core/date_utils'
 
 export async function GET(req: NextRequest) {
   const mobile = await getMobileUser(req)
@@ -14,10 +15,16 @@ export async function GET(req: NextRequest) {
 
   const athleteId = mobile.id
 
-  // R1: Free users only see last 30 days of history
-  const historyDateFilter = mobile.userPlan === 'FREE'
-    ? { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
-    : undefined
+  // Resolve user timezone (needed for date filter + freeLogs dayOfWeek)
+  const tz = req.nextUrl.searchParams.get('tz') || undefined
+  const userTz = tz ?? (await prisma.user.findUnique({ where: { id: athleteId }, select: { timezone: true } }))?.timezone ?? undefined
+
+  // R1: Free users only see last 30 days of history (timezone-aware)
+  let historyDateFilter: { gte: Date } | undefined
+  if (mobile.userPlan === 'FREE') {
+    const today = todayInTz(userTz)
+    historyDateFilter = { gte: new Date(today.getTime() - 30 * 86_400_000) }
+  }
 
   // Fetch en paralelo: sesiones de rutina asignada + logs libres de FUERZA
   const [gymSessions, freeLogs] = await Promise.all([
@@ -59,8 +66,11 @@ export async function GET(req: NextRequest) {
     }),
   ])
 
+  const jsToBase1 = (jsDay: number) => jsDay === 0 ? 7 : jsDay
+
   const formattedGym = gymSessions.map(gs => {
-    const workoutDay = gs.assignedWorkout?.template.days.find(d => d.dayOfWeek === gs.dayOfWeek)
+    const dow = jsToBase1(gs.dayOfWeek)
+    const workoutDay = gs.assignedWorkout?.template.days.find(d => d.dayOfWeek === dow)
 
     type ExerciseEntry = {
       name: string
@@ -100,7 +110,7 @@ export async function GET(req: NextRequest) {
     return {
       id: gs.id,
       date: gs.date.toISOString(),
-      dayOfWeek: gs.dayOfWeek,
+      dayOfWeek: dow,
       label: workoutDay?.label ?? 'Sesión',
       muscleGroups: workoutDay?.muscleGroups ?? [],
       durationMin: gs.durationMin,
@@ -117,7 +127,7 @@ export async function GET(req: NextRequest) {
   const formattedFree = freeLogs.map(fl => ({
     id: fl.id,
     date: fl.completedAt.toISOString(),
-    dayOfWeek: fl.completedAt.getUTCDay() === 0 ? 7 : fl.completedAt.getUTCDay(), // 1=lun…7=dom (UTC — completedAt stored as UTC)
+    dayOfWeek: (() => { const localDate = userTz ? new Date(fl.completedAt.toLocaleDateString('en-CA', { timeZone: userTz }) + 'T00:00:00Z') : fl.completedAt; const jsDay = localDate.getUTCDay(); return jsDay === 0 ? 7 : jsDay })(),
     label: 'Fuerza libre',
     muscleGroups: [] as string[],
     durationMin: fl.durationMin,
