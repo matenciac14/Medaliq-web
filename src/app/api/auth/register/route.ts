@@ -6,12 +6,14 @@ import { prisma } from '@/lib/db/prisma'
 import { rateLimitAsync } from '@/lib/rate_limit'
 import { sendCoachWelcomeEmail, sendEmailVerification } from '@/infrastructure/email/resend'
 import { emailSchema, passwordSchema, nameSchema, roleSchema, parseBody } from '@/lib/validation'
+import { redeemReferralCode } from '@/domain/referral/referral.use_case'
 
 const RegisterSchema = z.object({
   name: nameSchema,
   email: emailSchema,
   password: passwordSchema,
   role: roleSchema.optional().default('ATHLETE'),
+  referralCode: z.string().optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
     const parsed = parseBody(RegisterSchema, raw)
     if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
-    const { name, email, password, role } = parsed.data
+    const { name, email, password, role, referralCode } = parsed.data
     const userRole = role
 
     const existing = await prisma.user.findUnique({ where: { email } })
@@ -89,6 +91,13 @@ export async function POST(req: NextRequest) {
 
       return { user, verificationToken: vToken }
     })
+
+    // Redimir código de referido (best-effort — no bloquea registro)
+    if (isCoach && referralCode) {
+      redeemReferralCode(prisma, referralCode, newUser.user.id).catch((err) =>
+        console.error('[register] redeemReferralCode failed:', err)
+      )
+    }
 
     const baseUrl = process.env.NEXTAUTH_URL ?? 'https://medaliq.com'
 

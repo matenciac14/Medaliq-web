@@ -147,6 +147,10 @@ model User {
 
   // Swaps de alimentos sobre plan asignado por coach (NUT-SWAP-01)
   nutritionOverrides AthleteNutritionOverride[]
+
+  // Referidos coach→coach
+  coachReferralsSent     CoachReferral[] @relation("CoachReferralsSent")
+  coachReferralsReceived CoachReferral[] @relation("CoachReferralsReceived")
 }
 
 enum UserRole {
@@ -1491,6 +1495,25 @@ enum AthleteUserType {
   B2C_FREE
   B2C_PRO
   B2B
+}
+
+// ─── REFERIDOS COACH→COACH ───────────────────────────────────────────────────
+
+model CoachReferral {
+  id          String    @id @default(cuid())
+  referrerId  String
+  code        String    @unique // REF-XXXXXX
+  newCoachId  String?
+  redeemedAt  DateTime?
+  creditDays  Int       @default(30)
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  referrer User  @relation("CoachReferralsSent",     fields: [referrerId], references: [id], onDelete: Cascade)
+  newCoach  User? @relation("CoachReferralsReceived", fields: [newCoachId], references: [id], onDelete: SetNull)
+
+  @@index([referrerId])
+  @@index([code])
 }
 
 model TierFeatureConfig {

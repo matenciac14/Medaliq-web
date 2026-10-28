@@ -39,7 +39,7 @@ describe('Admin Disciplines [id] API', () => {
 
   describe('GET /api/admin/disciplines/[id]', () => {
     it('returns 403 for non-admin', async () => {
-      vi.mocked(auth).mockResolvedValue(null)
+      vi.mocked(auth).mockResolvedValue(null as any)
       const res = await GET(new Request('http://localhost') as any, makeParams('d1'))
       expect(res.status).toBe(403)
     })
