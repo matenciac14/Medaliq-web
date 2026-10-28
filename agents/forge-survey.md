@@ -12,12 +12,15 @@ Ejecutar ANTES de tocar cualquier archivo. Objetivo: entender el scope completo 
 
 ### 2. Decidir el carril
 
-| Situación | Carril |
-|-----------|--------|
-| 1 archivo, patrón ya existente | `direct` — no usar Forge |
-| Múltiples archivos, sin nueva abstracción | `survey → build` |
-| Nueva abstracción / cross-módulo / auth / billing | `pipeline completo` |
-| Ambigüedad | Preguntar a Miguel — no asumir |
+| Situación | Carril | Artefacto |
+|-----------|--------|-----------|
+| 1 archivo, patrón ya existente | `direct` — no usar Forge | ninguno |
+| 1-5 archivos, intención clara, sin nuevo modelo DB | `FTD` — carril medio | `contexts/FEATURE_DOC_template.md` → llenar antes del primer Edit |
+| Múltiples archivos, sin nueva abstracción | `survey → build` | mapa de scope en chat |
+| Nueva abstracción / cross-módulo / auth / billing / nuevo modelo DB | `pipeline completo` | mapa completo + docs leídos |
+| Ambigüedad | Preguntar a Miguel — no asumir | — |
+
+**Carril FTD**: copiar `contexts/FEATURE_DOC_template.md` → renombrar → llenar Intent + Scope → primer Edit recién entonces.
 
 ### 3. Leer documentación por módulo (solo lo relevante)
 
