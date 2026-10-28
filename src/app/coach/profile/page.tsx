@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import ProfileSection from './_components/ProfileSection'
+import ReferralSection from './_components/ReferralSection'
+import { getReferralSummary } from '@/domain/referral/referral.use_case'
 
 export default async function CoachProfilePage() {
   const session = await auth()
@@ -9,7 +11,7 @@ export default async function CoachProfilePage() {
     redirect('/login')
   }
 
-  const [profile, user] = await Promise.all([
+  const [profile, user, referral] = await Promise.all([
     prisma.coachProfile.findUnique({
       where: { coachId: session.user.id },
       include: {
@@ -21,6 +23,7 @@ export default async function CoachProfilePage() {
       where: { id: session.user.id },
       select: { identification: true, phoneWa: true, showPhoneWa: true },
     }),
+    getReferralSummary(prisma, session.user.id),
   ])
 
   return (
@@ -43,6 +46,15 @@ export default async function CoachProfilePage() {
           </a>
         )}
       </div>
+
+      <ReferralSection
+        initialCode={referral.code}
+        initialExpiresAt={referral.expiresAt.toISOString()}
+        initialRedeemedCount={referral.redeemedCount}
+        initialPendingCount={referral.pendingCount}
+      />
+
+      <div className="mt-6" />
 
       <ProfileSection
         initialProfile={profile ? {
