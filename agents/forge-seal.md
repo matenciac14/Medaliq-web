@@ -48,6 +48,21 @@ En `.claude/memory/session.md`:
 
 Si hay nuevo trap o patrón → agregar a `.claude/memory/discoveries.md`
 
+### 6. Índices — actualizar si el cambio los afecta
+
+Revisar cada ítem. Si aplica → actualizar el archivo indicado antes de commitear.
+
+| Si hiciste esto | Actualizar aquí |
+|-----------------|-----------------|
+| Nuevo trap (T-XX) agregado a `_traps.spec.md` | `CLAUDE.md` — sección "Traps por modulo", agregar T-XX al módulo correspondiente |
+| Spec nueva creada para un módulo de coach | `forge-survey.md` paso 3 — quitar ese módulo de la lista "sin spec" |
+| Endpoint `/api/mobile/*` nuevo sin par web | `agents/@mobile.md` — sección "Endpoints mobile-only" |
+| Pantalla nueva en MEDALIQ-MOBILE | `agents/@mobile.md` — sección "Inventario de pantallas" |
+| Agente nuevo creado (`agents/@xxx.md`) | `CLAUDE.md` — tabla "Agentes de rol" |
+| Módulo nuevo aparece en dominios o comportamiento | `agents/@dev.md` — si afecta reglas de la capa que toca |
+
+Si ninguno aplica → continuar.
+
 ### 7. Commit y PR
 
 ```bash
@@ -71,5 +86,6 @@ git push origin feature/<nombre>
 - [ ] Tests pasan
 - [ ] Roadmap actualizado
 - [ ] Spec actualizada (si aplica)
+- [ ] Índices actualizados (si aplica — ver paso 6)
 - [ ] Memoria actualizada
 - [ ] PR abierto a develop
