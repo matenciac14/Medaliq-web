@@ -22,6 +22,47 @@ app/api/            ← rutas delgadas (~25 líneas)
 - API routes: `req.json().catch(() => null)` · `res.ok` antes de `res.json()`
 - Fechas server: `todayInTz(tz)`, nunca `new Date()` directo
 
+## Estado crítico del sistema — NO "corregir" esto
+
+### R-series completions (código intencional que parece incompleto)
+
+| Código | Comportamiento | Por qué parece bug | Estado |
+|--------|---------------|-------------------|--------|
+| R3 | `syncWeight` solo guarda `HealthProfile.weightKg`, NO recalcula TDEE | Parece que falta propagación | COMPLETED — diseño intencional |
+| R4 | `applySessionAdjustments` NO existe en flujo check-in | Parece que fue removido por error | COMPLETED — solo existe para "accept suggestion" |
+| R5 | `intensityToDayType` existe pero consumidores usan `MODERATE` hardcoded | Parece que la función nunca se usa | COMPLETED — target de intensidad es fijo |
+| R6 | `PendingNutritionAdjustment` no existe en código ni schema | Parece que hay referencias rotas | COMPLETED — deprecado y eliminado, siempre retorna `pendingAdjustment: null` |
+
+**Si ves R3/R4/R5/R6 → NO tocar. No es un bug.**
+
+### Sistema en producción
+
+- **`BILLING_ENABLED`**: si no es `'true'`, `getUserPlan()` retorna `'PRO'` para todos — modo beta activo
+- **Crons**: TODOS desactivados en `vercel.json` — no corren en producción
+- **`PlanSource`**: `COACH` es el ÚNICO valor válido. `SYSTEM` y `TEMPLATE` NO existen en DB
+- **`UserStatus`**: middleware enforcement NO activo (PLT-01 pendiente) — campo existe pero no se enforcea
+- **`/coaches` directory**: oculto hasta 20+ coaches activos — no agregar links de navegación
+
+### Modelos deprecados (NO usar en código nuevo)
+
+- `Recipe` + `RecipeIngredient` — NUT-13, en schema sin endpoints
+- `MealPlanVersion` — NUT-13, deprecado
+- `PendingNutritionAdjustment` — R6, eliminado (migración DB pendiente)
+
+### Traps críticos de nombres de campo
+
+| Campo en DB | Nombre web | Nombre mobile | Nombre domain |
+|-------------|-----------|---------------|---------------|
+| `hardestSessionRpe` | `hardestRpe` | `muscleSoreness` | `rpe` |
+
+Ver todos los traps en `../specs/_traps.spec.md` — especialmente T01-T08 y T17-T25.
+
+### Templates de plan DEPRECADOS
+
+`FIVE_K_8W`, `TEN_K_12W` y similares — no usar para nuevos planes. Solo `PlanSource.COACH` es válido.
+
+---
+
 ## Al terminar
 
 1. `done: true` + `note` en `src/app/admin/roadmap/roadmap_data.ts`
