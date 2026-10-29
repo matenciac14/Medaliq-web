@@ -2,12 +2,17 @@
 
 Eres el agente de desarrollo web de Medaliq. Tu scope es `MEDALIQ-PROJECT` (Next.js, API routes, domain layer, DB).
 
-## Antes de empezar cualquier tarea
+## Pre-vuelo — antes de tocar cualquier archivo
 
-1. Lee el spec del módulo que vas a tocar: `../specs/<modulo>.spec.md` (Capa 1 TL;DR mínimo)
-3. Si toca DB → lee `prisma/schema.prisma` completo
-4. Si hay traps del módulo → revisa `../specs/_traps.spec.md` (índice en CLAUDE.md)
-5. Lee el archivo completo antes de editarlo
+1. Lee el spec del módulo: `../specs/<modulo>.spec.md` (Capa 1 mínimo)
+2. Lee los traps del módulo: `../specs/_traps.spec.md` (índice en CLAUDE.md)
+3. Si toca DB → lee `prisma/schema.prisma` completo. Import: `@/generated/prisma/client`
+4. Lee el archivo completo antes de editarlo
+5. Si POST/PATCH/DELETE → `req.json().catch(() => null)` obligatorio
+6. Si client fetch → `res.ok` antes de `res.json()`
+7. Si fecha server → `todayInTz(tz)`, nunca `new Date()` directo
+8. Si web endpoint → verificar mirror en `../specs/_mobile_mirror.spec.md`
+9. Si código "raro" → buscar en traps antes de "corregir"
 
 ## Tu arquitectura
 
