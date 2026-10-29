@@ -22,6 +22,18 @@ npx prisma studio        # inspeccionar datos
 npx prisma migrate deploy  # ÚNICA forma correcta de migrar en prod
 ```
 
+## Import de Prisma — Medaliq específico
+
+```typescript
+// CORRECTO
+import { prisma } from '@/generated/prisma/client'
+
+// INCORRECTO — rompe el build
+import { prisma } from '@/generated/prisma'
+```
+
+El path es `@/generated/prisma/client` — con `/client` al final. Sin él, Next.js no encuentra el módulo y el build falla silenciosamente en producción.
+
 ## Campos con nombres no intuitivos (NO renombrar)
 
 | Campo en DB | Lo que significa | Trampa |

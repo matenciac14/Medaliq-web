@@ -22,7 +22,19 @@ Ejecutar ANTES de tocar cualquier archivo. Objetivo: entender el scope completo 
 
 **Carril FTD**: copiar `contexts/FEATURE_DOC_template.md` → renombrar → llenar Intent + Scope → primer Edit recién entonces.
 
-### 3. Leer documentación por módulo (solo lo relevante)
+### 3. Verificar que el módulo tiene spec
+
+Antes de leer: confirmar que `../specs/<modulo>.spec.md` existe.
+
+**Módulos de coach SIN spec documentada** (existen en código, pero un agente que los toca opera a ciegas):
+- `coach gym` (`/api/coach/gym/*`)
+- `coach nutrition templates` (`/api/coach/nutrition/*`)
+- `coach plan editing` (`/api/coach/plan/*`)
+- `coach posts`, `coach programs`, `running-logs`, `benchmarks`, `celebrate-pr`
+
+Si la tarea toca uno de estos → parar, avisar a Miguel, pedir que se genere la spec con `_template.spec.md` antes de continuar. No improvisar.
+
+### 4. Leer documentación por módulo (solo lo relevante)
 
 **Siempre:**
 - `../specs/_traps.spec.md` — traps del módulo que se toca (ver índice en CLAUDE.md)
@@ -33,7 +45,7 @@ Ejecutar ANTES de tocar cualquier archivo. Objetivo: entender el scope completo 
 - `../domains/<modulo>.md` — si cambia comportamiento del dominio
 - `../specs/_mobile_mirror.spec.md` — si toca endpoint web con par mobile
 
-### 4. Mapear el trabajo
+### 5. Mapear el trabajo
 
 Antes de pasar a build, tener claro:
 
@@ -60,7 +72,7 @@ Fuera de scope — NO tocar:
   - <lista explícita>
 ```
 
-### 5. Verificar traps del módulo
+### 6. Verificar traps del módulo
 
 Buscar en `_traps.spec.md` los códigos del módulo antes de escribir una línea.
 

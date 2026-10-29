@@ -114,7 +114,7 @@ Arrancar con: `"Lee agents/forge-survey.md. La tarea es: <descripcion>"`
 auth     → T06, T07, T21, T22
 nutrition→ T03, T04, T11, T13, T14
 gym      → T08, T12, T15
-plan     → T02, T09, T16, T24, T25
+plan     → T02, T05, T09, T16, T24, T25   ← T05: hardestRpe/muscleSoreness/rpe/hardestSessionRpe = mismo campo
 dashboard→ T01, T17
 routes   → T10, T18, T19, T20 (transversal)
 dates    → T01, T17, T23 (transversal)
