@@ -90,6 +90,12 @@ auth.ts · gymSession.ts · gymSessionDraft.ts
 - **Coach mobile**: NO implementado — solo web por ahora
 - **Strava**: backend completo, necesita env vars para activar
 
+## Bugs conocidos activos
+
+| Bug | Descripción | Estado |
+|-----|-------------|--------|
+| `/(app)/pending` cast | La navegación a esta pantalla usa `as never` en algún punto del código. Compila pero puede fallar en runtime si Expo Router cambia el tipado. | Pendiente verificar si la pantalla existe como archivo y reemplazar el cast |
+
 ## NO HACER
 
 - NO agregar dependencias sin preguntar
