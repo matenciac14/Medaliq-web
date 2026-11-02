@@ -43,7 +43,7 @@ export default async function CheckinPage() {
     }),
   ])
 
-  const tz = userRecord.timezone ?? 'America/Bogota'
+  const tz = userRecord.timezone ?? 'UTC'
   const nowInTz = new Date(new Date().toLocaleString('en-US', { timeZone: tz }))
   const dayOfWeek = nowInTz.getDay() // 0=Dom, 1=Lun … 5=Vie, 6=Sáb
   const isEarlyInWeek = dayOfWeek >= 1 && dayOfWeek <= 4
