@@ -1,6 +1,6 @@
 Ejecuta el protocolo de cierre de sesión para Medaliq Web.
 
-## 1. Actualiza `.claude/memory/session.md`
+## 1. Actualiza memoria en repo: `.claude/memory/session.md`
 
 - `## Ultima actualizacion` → fecha de hoy
 - `## Lo que se hizo en esta sesion` → lista de lo implementado/corregido (archivos editados, features, bugs)
@@ -26,6 +26,14 @@ Actualizar `.claude/memory/architecture.md` con la decisión y el por qué.
 
 Si se completó alguna tarea: marcar `done: true` en `src/app/admin/roadmap/roadmap_data.ts`.
 
-## 5. Confirma
+## 5. Actualiza auto-memory del sistema
+
+Ruta: `/Users/miguelatencia/.claude/projects/-Users-miguelatencia-Desktop-FACTORY-AI-SOFTWARE-MEDALIQ-MEDALIQ-PROJECT/memory/MEMORY.md`
+
+Actualizar las secciones que cambiaron (estado, deuda técnica, auditorías, última sesión). NO reescribir todo — solo lo que cambió.
+
+Si la sesión tuvo cambios importantes que afectan a otros repos (mobile, docs), anotar en la sección relevante para que el próximo /wrap en ese repo lo recoja.
+
+## 6. Confirma
 
 Responde con una línea por cada archivo actualizado y los próximos pasos.

@@ -74,6 +74,9 @@ Para tareas especializadas, invocar el agente correcto:
 | `@dba` | `agents/@dba.md` | schema.prisma, migraciones |
 | `@mobile` | `agents/@mobile.md` | pantallas mobile, endpoints /api/mobile/* |
 | `@admin` | `agents/@admin.md` | panel admin, acciones destructivas, roadmap |
+| `@cpo` | `agents/@cpo.md` | decisiones de producto, priorización, features vs roadmap |
+| `@cmo` | `agents/@cmo.md` | pitch, posicionamiento, GTM, coaches, marketing |
+| `@security` | `agents/@security.md` | auth dual, multi-tenant, datos de salud, OWASP |
 
 Invocar: abrir nueva terminal → `claude` → `"Eres @dev. Lee agents/@dev.md. Tu tarea: <descripcion>"`
 

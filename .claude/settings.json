@@ -1,6 +1,16 @@
 {
   "model": "opus",
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_USER_PROMPT\" | grep -qiE '(feature|add|crea|implem|agreg|build|nueva|modif|cambi|arregl|fix|quiero|necesit|hacer|agrega)' && echo '[FORGE] >1 archivo → crea FTD en contexts/ antes del primer Edit. Nueva abstracción/DB → lee forge-survey.md primero.' || true"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -17,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/miguelatencia/Desktop/FACTORY_AI_SOFTWARE/MEDALIQ/MEDALIQ-PROJECT && pnpm tsc --noEmit 2>&1 | tail -5 && echo '✓ TypeScript OK — puedes declarar listo' || (echo '✗ TypeScript con errores — corrige antes de terminar' && exit 2)"
+            "command": "cd /Users/miguelatencia/Desktop/FACTORY_AI_SOFTWARE/MEDALIQ/MEDALIQ-PROJECT && (git status --short | grep -q . && echo '⚠ Cambios sin commitear — corre /wrap antes de cerrar' || true); pnpm tsc --noEmit 2>&1 | tail -5 && echo '✓ TypeScript OK — puedes declarar listo' || (echo '✗ TypeScript con errores — corrige antes de terminar' && exit 2)"
           }
         ]
       }
