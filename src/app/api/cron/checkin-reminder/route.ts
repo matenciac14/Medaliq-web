@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db/prisma'
 import { sendCheckinReminderEmail } from '@/infrastructure/email/resend'
 import { sendPushNotification } from '@/lib/push/expo_push'
 
-// Cron: domingo 23:00 UTC = 18:00 COT
+// Cron: domingo 23:00 UTC
 // Envia recordatorio a atletas con plan activo que no hicieron check-in esta semana
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -11,14 +11,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Lunes 00:00 COT (UTC-5) expresado en UTC
+  // Lunes 00:00 UTC de esta semana
   const now = new Date()
-  const bogota = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }))
-  const dayOfWeek = bogota.getDay() // 0=Dom
-  const monday = new Date(bogota)
-  monday.setDate(bogota.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-  monday.setHours(0, 0, 0, 0)
-  const weekStartUTC = new Date(monday.getTime() + 5 * 60 * 60 * 1000) // COT → UTC
+  const dayOfWeek = now.getUTCDay() // 0=Dom
+  const monday = new Date(now)
+  monday.setUTCDate(now.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+  monday.setUTCHours(0, 0, 0, 0)
+  const weekStartUTC = monday
 
   // Atletas con plan activo
   const activePlanRows = await prisma.trainingPlan.findMany({

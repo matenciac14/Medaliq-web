@@ -25,6 +25,7 @@ Ejecutar después de completar `forge-survey.md`. El mapa de scope debe estar li
 - Leer `prisma/schema.prisma` completo antes de agregar campo
 - `$transaction`: reads FUERA → writes DENTRO → I/O externo FUERA
 - Multi-tenant: `userId` o `athleteId` en TODO modelo nuevo
+- Import Prisma: `@/generated/prisma/client` — NUNCA `@/generated/prisma` (sin `/client` rompe el build)
 
 **Domain:**
 - Sin imports de Prisma, Next.js ni fetch

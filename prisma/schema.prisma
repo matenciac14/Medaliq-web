@@ -34,7 +34,7 @@ model User {
   needsRoleSelection Boolean @default(false)
 
   // Localización del dispositivo (detectada en login, actualizable vía PATCH /api/me)
-  timezone   String?  // IANA tz, e.g. 'America/Mexico_City'. null = America/Bogota
+  timezone   String?  // IANA tz, e.g. 'America/Mexico_City'. null = UTC
   locale     String?  // BCP 47, e.g. 'es-MX'. null = es-CO
 
   // Push notifications (Expo Push Token del dispositivo mobile)
