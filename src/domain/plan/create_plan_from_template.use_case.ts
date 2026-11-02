@@ -77,12 +77,12 @@ export async function createPlanFromTemplateUseCase(
     const sessionsData = template.weeks.flatMap((wt) =>
       wt.sessions.map((s) => {
         const week = weekById.get(wt.weekNumber)!
-        const dayOfWeek = s.dayOfWeek - 1
+        const dayOffset = s.dayOfWeek - 1 // 0-based offset for date calculation
         const sessionDate = new Date(week.startDate)
-        sessionDate.setDate(sessionDate.getDate() + dayOfWeek)
+        sessionDate.setDate(sessionDate.getDate() + dayOffset)
         return {
           weekId: week.id,
-          dayOfWeek,
+          dayOfWeek: s.dayOfWeek, // 1-7 (1=Mon, 7=Sun) — consistent with rest of system
           type: s.type as SessionType,
           intensity: getSessionIntensity(s.type),
           durationMin: s.durationMin,
