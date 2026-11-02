@@ -29,20 +29,18 @@ En `../domains/<modulo>.md`:
 - [ ] Si cambió lo que el sistema puede hacer → actualizar el domain doc
 - [ ] Si hay nuevo flujo cross-actor → actualizar `flujos-cruzados.md`
 
-### 4. Tests
+### 4. Verificación final
+
+Correr en este orden y confirmar que todo pasa:
+
+```bash
+pnpm verify   # tsc + vitest + next build — los tres deben pasar
+```
 
 - [ ] Tests para lógica nueva en domain/ (funciones puras)
-- [ ] Tests para service con mock-repo si hay lógica de negocio compleja
-- [ ] `pnpm test` pasa sin regresiones
+- [ ] `pnpm verify` pasa sin errores
 
-### 5. Contexto de feature
-
-En `CLAUDE.worktree.md`:
-- [ ] `## Estado` → marcar `Completa — pendiente PR`
-- [ ] `## Donde quede` → vaciar o poner "DONE"
-- [ ] `## Decisiones tomadas` → completar con decisiones de esta sesión
-
-### 6. Memoria
+### 5. Memoria
 
 En `.claude/memory/session.md`:
 - [ ] Actualizar `## Lo que se hizo en esta sesión`
@@ -50,13 +48,28 @@ En `.claude/memory/session.md`:
 
 Si hay nuevo trap o patrón → agregar a `.claude/memory/discoveries.md`
 
+### 6. Índices — actualizar si el cambio los afecta
+
+Revisar cada ítem. Si aplica → actualizar el archivo indicado antes de commitear.
+
+| Si hiciste esto | Actualizar aquí |
+|-----------------|-----------------|
+| Nuevo trap (T-XX) agregado a `_traps.spec.md` | `CLAUDE.md` — sección "Traps por modulo", agregar T-XX al módulo correspondiente |
+| Spec nueva creada para un módulo de coach | `forge-survey.md` paso 3 — quitar ese módulo de la lista "sin spec" |
+| Endpoint `/api/mobile/*` nuevo sin par web | `agents/@mobile.md` — sección "Endpoints mobile-only" |
+| Pantalla nueva en MEDALIQ-MOBILE | `agents/@mobile.md` — sección "Inventario de pantallas" |
+| Agente nuevo creado (`agents/@xxx.md`) | `CLAUDE.md` — tabla "Agentes de rol" |
+| Módulo nuevo aparece en dominios o comportamiento | `agents/@dev.md` — si afecta reglas de la capa que toca |
+
+Si ninguno aplica → continuar.
+
 ### 7. Commit y PR
 
 ```bash
 git add <archivos específicos>
 git commit -m "feat(<modulo>): descripción concisa"
 git push origin feature/<nombre>
-# Abrir PR → develop
+# Abrir PR → develop  (NUNCA directamente a main)
 ```
 
 **Mensaje de commit:**
@@ -73,5 +86,6 @@ git push origin feature/<nombre>
 - [ ] Tests pasan
 - [ ] Roadmap actualizado
 - [ ] Spec actualizada (si aplica)
+- [ ] Índices actualizados (si aplica — ver paso 6)
 - [ ] Memoria actualizada
 - [ ] PR abierto a develop

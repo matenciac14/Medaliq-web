@@ -132,7 +132,7 @@ export async function getTodaySession(
   timezone: string | null,
   prisma: PrismaClient,
 ): Promise<TodaySessionResult> {
-  const tz = timezone ?? 'America/Bogota'
+  const tz = timezone ?? 'UTC'
   const todayDow = jsToOurDow(new Date(new Date().toLocaleString('en-US', { timeZone: tz })).getDay())
 
   const [activePlan, assigned, coachRelation, plannedRunTodayRaw, weeklyRoutine] = await Promise.all([

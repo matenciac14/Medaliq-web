@@ -29,10 +29,9 @@ e2e/.auth/
 .DS_Store
 *.pem
 
-# Claude Code — ignorar settings locales, trackear memoria
-.claude/
-!.claude/memory/
-!.claude/memory/**
+# Claude Code — solo ignorar archivos locales/secretos. memory/ y settings.json se trackean.
+.claude/settings.local.json
+.claude/launch.json
 
 # debug
 npm-debug.log*

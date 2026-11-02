@@ -1,6 +1,9 @@
 /**
  * Webhook genérico de pago — usado solo en dev/stub.
  * Producción usa /api/webhooks/wompi (Wompi-específico con firma propia).
+ *
+ * SECURITY: bloqueado en producción cuando PAYMENT_GATEWAY no está configurado
+ * (default 'stub'). El stub no verifica firma — no puede estar expuesto en producción.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getPaymentGateway } from '@/infrastructure/billing/payment_gateway.factory'
@@ -8,6 +11,12 @@ import { BillingRepository } from '@/infrastructure/billing/billing.repository'
 import type { CoachTier } from '@/domain/subscription/tier_features'
 
 export async function POST(req: NextRequest) {
+  // Block stub gateway in production — it accepts any payload without signature verification
+  const gatewayProvider = process.env.PAYMENT_GATEWAY ?? 'stub'
+  if (process.env.NODE_ENV === 'production' && gatewayProvider === 'stub') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
   const rawBody   = await req.text()
   const signature = req.headers.get('x-payment-signature') ?? ''
 

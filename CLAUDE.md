@@ -23,9 +23,44 @@ lib/                <- utilidades compartidas
 - Palabras: `_` (`get_plan_data.ts`) · Rol: `.` (`checkout.use_case.ts`) · Tests: `.test.ts`
 - Dirs URL: `-` (`forgot-password/`) · Dirs codigo: `_` (`coach_dashboard/`)
 
-## Commits
-`feat:` · `fix:` · `chore:` · `docs:` — Branch: `feature/<n>-kebab` · `bugfix/<n>-kebab`
+## Git flow
+`main` ← `develop` ← `feature/<n>-kebab` · `bugfix/<n>-kebab`
+Commits: `feat:` · `fix:` · `chore:` · `docs:`
+**PRs siempre a `develop`** — `develop` → `main` solo en releases.
 **Pre-push**: `npx next build` debe pasar. Nunca pushear build roto.
+
+---
+
+## Estado del sistema — NO "corregir" sin verificar aqui
+
+### R-series completions (codigo intencional que parece incompleto)
+
+| Codigo | Comportamiento actual | Razon |
+|--------|-----------------------|-------|
+| R3 | `syncWeight` solo guarda `weightKg` — NO recalcula TDEE | Diseño intencional |
+| R4 | `applySessionAdjustments` NO esta en check-in | Removido intencionalmente — solo en "accept suggestion" |
+| R5 | `intensityToDayType` existe pero consumidores usan `MODERATE` hardcoded | Target de intensidad es fijo |
+| R6 | `PendingNutritionAdjustment` eliminado — retorna `pendingAdjustment: null` | Deprecado y removido |
+
+**Si ves R3/R4/R5/R6 → NO tocar. No es un bug.**
+
+### Estado de produccion
+
+- **Crons**: TODOS desactivados en `vercel.json` — no corren en produccion
+- **`BILLING_ENABLED`**: si no es `'true'` → `getUserPlan()` retorna `'PRO'` para todos (modo beta)
+- **`PlanSource`**: `COACH` es el UNICO valor valido en DB. `SYSTEM` y `TEMPLATE` son dead code.
+- **`UserStatus` enforcement**: NO activo (PLT-01 pendiente)
+- **`/coaches` directory**: oculto hasta 20+ coaches activos
+
+### Modelos deprecados (NO usar en codigo nuevo)
+
+- `Recipe` + `RecipeIngredient` — NUT-13
+- `MealPlanVersion` — NUT-13
+- `PendingNutritionAdjustment` — R6, eliminado
+
+### Campo con 4 nombres (T05 — el trap mas peligroso)
+
+`hardestSessionRpe` (DB) = `rpe` (domain) = `hardestRpe` (web) = `muscleSoreness` (mobile)
 
 ---
 
@@ -38,8 +73,12 @@ Para tareas especializadas, invocar el agente correcto:
 | `@dev` | `agents/@dev.md` | features web, API routes, domain layer |
 | `@dba` | `agents/@dba.md` | schema.prisma, migraciones |
 | `@mobile` | `agents/@mobile.md` | pantallas mobile, endpoints /api/mobile/* |
+| `@admin` | `agents/@admin.md` | panel admin, acciones destructivas, roadmap |
+| `@cpo` | `agents/@cpo.md` | decisiones de producto, priorización, features vs roadmap |
+| `@cmo` | `agents/@cmo.md` | pitch, posicionamiento, GTM, coaches, marketing |
+| `@security` | `agents/@security.md` | auth dual, multi-tenant, datos de salud, OWASP |
 
-Invocar: abrir nueva terminal → `claude` → `"Eres @dev. Lee agents/@dev.md y CLAUDE.worktree.md. Tu tarea: <descripcion>"`
+Invocar: abrir nueva terminal → `claude` → `"Eres @dev. Lee agents/@dev.md. Tu tarea: <descripcion>"`
 
 ## Forge — pipeline de desarrollo
 
@@ -78,7 +117,7 @@ Arrancar con: `"Lee agents/forge-survey.md. La tarea es: <descripcion>"`
 auth     → T06, T07, T21, T22
 nutrition→ T03, T04, T11, T13, T14
 gym      → T08, T12, T15
-plan     → T02, T09, T16, T24, T25
+plan     → T02, T05, T09, T16, T24, T25   ← T05: hardestRpe/muscleSoreness/rpe/hardestSessionRpe = mismo campo
 dashboard→ T01, T17
 routes   → T10, T18, T19, T20 (transversal)
 dates    → T01, T17, T23 (transversal)

@@ -7,19 +7,34 @@ Ejecutar ANTES de tocar cualquier archivo. Objetivo: entender el scope completo 
 ## Protocolo
 
 ### 1. Leer el scope
-- Leer `CLAUDE.worktree.md` (o el issue/tarea que trajo aquí)
+- Leer la descripción de la tarea que trajo aquí
 - Identificar módulos afectados
 
 ### 2. Decidir el carril
 
-| Situación | Carril |
-|-----------|--------|
-| 1 archivo, patrón ya existente | `direct` — no usar Forge |
-| Múltiples archivos, sin nueva abstracción | `survey → build` |
-| Nueva abstracción / cross-módulo / auth / billing | `pipeline completo` |
-| Ambigüedad | Preguntar a Miguel — no asumir |
+| Situación | Carril | Artefacto |
+|-----------|--------|-----------|
+| 1 archivo, patrón ya existente | `direct` — no usar Forge | ninguno |
+| 1-5 archivos, intención clara, sin nuevo modelo DB | `FTD` — carril medio | `contexts/FEATURE_DOC_template.md` → llenar antes del primer Edit |
+| Múltiples archivos, sin nueva abstracción | `survey → build` | mapa de scope en chat |
+| Nueva abstracción / cross-módulo / auth / billing / nuevo modelo DB | `pipeline completo` | mapa completo + docs leídos |
+| Ambigüedad | Preguntar a Miguel — no asumir | — |
 
-### 3. Leer documentación por módulo (solo lo relevante)
+**Carril FTD**: copiar `contexts/FEATURE_DOC_template.md` → renombrar → llenar Intent + Scope → primer Edit recién entonces.
+
+### 3. Verificar que el módulo tiene spec
+
+Antes de leer: confirmar que `../specs/<modulo>.spec.md` existe.
+
+**Módulos de coach SIN spec documentada** (existen en código, pero un agente que los toca opera a ciegas):
+- `coach gym` (`/api/coach/gym/*`)
+- `coach nutrition templates` (`/api/coach/nutrition/*`)
+- `coach plan editing` (`/api/coach/plan/*`)
+- `coach posts`, `coach programs`, `running-logs`, `benchmarks`, `celebrate-pr`
+
+Si la tarea toca uno de estos → parar, avisar a Miguel, pedir que se genere la spec con `_template.spec.md` antes de continuar. No improvisar.
+
+### 4. Leer documentación por módulo (solo lo relevante)
 
 **Siempre:**
 - `../specs/_traps.spec.md` — traps del módulo que se toca (ver índice en CLAUDE.md)
@@ -30,7 +45,7 @@ Ejecutar ANTES de tocar cualquier archivo. Objetivo: entender el scope completo 
 - `../domains/<modulo>.md` — si cambia comportamiento del dominio
 - `../specs/_mobile_mirror.spec.md` — si toca endpoint web con par mobile
 
-### 4. Mapear el trabajo
+### 5. Mapear el trabajo
 
 Antes de pasar a build, tener claro:
 
@@ -57,7 +72,7 @@ Fuera de scope — NO tocar:
   - <lista explícita>
 ```
 
-### 5. Verificar traps del módulo
+### 6. Verificar traps del módulo
 
 Buscar en `_traps.spec.md` los códigos del módulo antes de escribir una línea.
 
@@ -65,6 +80,6 @@ Buscar en `_traps.spec.md` los códigos del módulo antes de escribir una línea
 
 ## Salida esperada
 
-Al terminar survey: el mapa de arriba completo + decisión de carril documentada en `CLAUDE.worktree.md` bajo `## Scope`.
+Al terminar survey: el mapa de arriba completo + decisión de carril documentada en chat antes de pasar a build.
 
 Pasar a `forge-build.md`.

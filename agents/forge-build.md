@@ -25,6 +25,7 @@ Ejecutar después de completar `forge-survey.md`. El mapa de scope debe estar li
 - Leer `prisma/schema.prisma` completo antes de agregar campo
 - `$transaction`: reads FUERA → writes DENTRO → I/O externo FUERA
 - Multi-tenant: `userId` o `athleteId` en TODO modelo nuevo
+- Import Prisma: `@/generated/prisma/client` — NUNCA `@/generated/prisma` (sin `/client` rompe el build)
 
 **Domain:**
 - Sin imports de Prisma, Next.js ni fetch
@@ -51,7 +52,7 @@ Antes de pasar al siguiente archivo:
 ### 4. Build incremental
 
 - Un archivo a la vez en el orden del punto 1
-- Si aparece un trap no documentado → anotarlo en `CLAUDE.worktree.md` bajo `## Decisiones tomadas`
+- Si aparece un trap no documentado → anotarlo en `.claude/memory/discoveries.md`
 - Si el scope crece durante build → parar, documentar, preguntar a Miguel antes de continuar
 
 ---

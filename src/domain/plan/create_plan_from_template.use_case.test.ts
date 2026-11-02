@@ -94,7 +94,7 @@ function createMockDb() {
             isRecoveryWeek: false, volumeKm: 20,
             startDate: new Date('2026-01-05'), endDate: new Date('2026-01-11'),
             sessions: [
-              { id: 's1', dayOfWeek: 0, type: 'EASY_RUN', durationMin: 30, zoneTarget: '2', detailText: null, sportLabel: null, workoutDayId: null },
+              { id: 's1', dayOfWeek: 1, type: 'EASY_RUN', durationMin: 30, zoneTarget: '2', detailText: null, sportLabel: null, workoutDayId: null },
             ],
           },
         ],
@@ -221,5 +221,33 @@ describe('createPlanFromTemplateUseCase', () => {
     expect(txProxy.plannedSession.createMany).toHaveBeenCalledTimes(1)
     const sessionsData = txProxy.plannedSession.createMany.mock.calls[0][0].data
     expect(sessionsData).toHaveLength(3) // 2 sessions week 1 + 1 session week 2
+  })
+
+  it('almacena dayOfWeek como base-1 (1=lunes, 7=domingo)', async () => {
+    ;(db.coachAthlete.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'rel-1' })
+
+    await createPlanFromTemplateUseCase(BASE_INPUT, db)
+
+    const sessionsData = txProxy.plannedSession.createMany.mock.calls[0][0].data
+    // Template has dayOfWeek: 1, 3, 2 — must be stored as-is (base-1)
+    expect(sessionsData[0].dayOfWeek).toBe(1)
+    expect(sessionsData[1].dayOfWeek).toBe(3)
+    expect(sessionsData[2].dayOfWeek).toBe(2)
+  })
+
+  it('calcula fecha correcta usando dayOfWeek como offset desde lunes', async () => {
+    ;(db.coachAthlete.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'rel-1' })
+
+    await createPlanFromTemplateUseCase(BASE_INPUT, db)
+
+    const sessionsData = txProxy.plannedSession.createMany.mock.calls[0][0].data
+    // Week 1 starts 2026-01-05 (Monday)
+    // dayOfWeek 1 (Mon) → offset 0 → 2026-01-05
+    // dayOfWeek 3 (Wed) → offset 2 → 2026-01-07
+    expect(sessionsData[0].date.toISOString().slice(0, 10)).toBe('2026-01-05')
+    expect(sessionsData[1].date.toISOString().slice(0, 10)).toBe('2026-01-07')
+    // Week 2 starts 2026-01-12 (Monday)
+    // dayOfWeek 2 (Tue) → offset 1 → 2026-01-13
+    expect(sessionsData[2].date.toISOString().slice(0, 10)).toBe('2026-01-13')
   })
 })

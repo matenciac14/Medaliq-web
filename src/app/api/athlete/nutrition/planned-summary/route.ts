@@ -8,7 +8,7 @@ import { todayInTz } from '@/lib/core/date_utils'
  * GET /api/athlete/nutrition/planned-summary?date=YYYY-MM-DD
  *
  * Resumen nutricional de un día: PlannedMeals + FoodLogs + totales comparativos.
- * Default: hoy (America/Bogota).
+ * Default: hoy en timezone del usuario (fallback UTC).
  */
 export async function GET(req: NextRequest) {
   const session = await auth()
