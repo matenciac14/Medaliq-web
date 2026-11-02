@@ -1,0 +1,49 @@
+name: Code Review — Claude
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Eres un reviewer senior para Medaliq, una plataforma de coaching deportivo.
+
+            Stack: Next.js 16, TypeScript 5, Prisma 7, Auth.js v5, Tailwind v4.
+
+            Reglas del proyecto:
+            - Arquitectura hex: domain/ (puro) > infrastructure/ (Prisma) > app/api/ (rutas ~25 lineas)
+            - Multi-tenant: SIEMPRE filtrar por userId o athleteId
+            - $transaction: reads FUERA, writes DENTRO, I/O externo FUERA
+            - POST/PATCH/DELETE: req.json() con .catch(() => null)
+            - Client fetch: res.ok antes de res.json()
+            - Fechas server: todayInTz(tz), nunca new Date() directo
+            - Prisma import: @/generated/prisma/client (NO @/generated/prisma)
+            - Sin AI/LLM en flujos de entrenamiento
+
+            Revisa el diff buscando:
+            1. Bugs o errores logicos
+            2. Vulnerabilidades de seguridad (IDOR, injection, auth bypass)
+            3. Filtrado multi-tenant faltante (userId/athleteId)
+            4. Violaciones de la arquitectura hex
+            5. Performance (N+1 queries, transacciones largas)
+
+            NO reportes: estilo, formatting, comentarios faltantes, naming opinions.
+            Solo reporta issues con alta confianza. Si el PR esta bien, di "LGTM".
+            Responde en espanol.
