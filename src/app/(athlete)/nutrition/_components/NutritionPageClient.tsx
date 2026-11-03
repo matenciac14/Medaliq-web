@@ -8,6 +8,7 @@ import DeficitHeroCard from './DeficitHeroCard'
 import NutritionSummaryDonut from './NutritionSummaryDonut'
 import ProximaComidaCard from './ProximaComidaCard'
 import MealListInline from './MealListInline'
+import MyFoodProposals from './MyFoodProposals'
 
 type ConsumedData = { kcal: number; proteinG: number; carbsG: number; fatG: number }
 type TargetData = { kcal: number; proteinG: number; carbsG: number; fatG: number }
@@ -176,6 +177,7 @@ export default function NutritionPageClient({
           {menuLinksSlot}
 
           <div id="tracking">{trackingSectionSlot}</div>
+          <MyFoodProposals />
 
           {foodGuideSlot}
         </div>
@@ -285,6 +287,7 @@ export default function NutritionPageClient({
         {menuLinksSlot}
 
         <div id="tracking-mobile">{trackingSectionSlot}</div>
+        <MyFoodProposals />
 
         {foodGuideSlot}
       </div>

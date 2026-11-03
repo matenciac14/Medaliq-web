@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { AthleteData, ActivePlanData, HealthProfileData, PlanSessionData, GymRoutineData } from '../AthleteDetailClient'
 
@@ -224,6 +226,24 @@ const MUSCLE_ICONS: Record<string, string> = {
 }
 
 function GymRoutineView({ athleteId, gymRoutine }: { athleteId: string; gymRoutine: NonNullable<GymRoutineData> }) {
+  const router = useRouter()
+  const [unassigning, setUnassigning] = useState(false)
+
+  async function handleUnassign() {
+    if (!confirm('¿Desasignar esta rutina del atleta?')) return
+    setUnassigning(true)
+    try {
+      const res = await fetch(`/api/coach/gym/routines/${gymRoutine.templateId}/assign`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ athleteId }),
+      })
+      if (res.ok) router.refresh()
+    } finally {
+      setUnassigning(false)
+    }
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Header */}
@@ -247,13 +267,22 @@ function GymRoutineView({ athleteId, gymRoutine }: { athleteId: string; gymRouti
             </div>
           </div>
         </div>
-        <Link
-          href={`/coach/gym?assign=${athleteId}`}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#1e3a5f' }}
-        >
-          Editar rutina →
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleUnassign}
+            disabled={unassigning}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
+          >
+            {unassigning ? 'Desasignando...' : 'Desasignar'}
+          </button>
+          <Link
+            href={`/coach/gym?assign=${athleteId}`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#1e3a5f' }}
+          >
+            Editar rutina →
+          </Link>
+        </div>
       </div>
 
       {/* Workout days */}
