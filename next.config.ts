@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  async redirects() {
+    return [
+      { source: '/privacy', destination: '/privacidad', permanent: true },
+      { source: '/terms', destination: '/terminos', permanent: true },
+    ]
+  },
 };
 
 export default withSentryConfig(nextConfig, {
