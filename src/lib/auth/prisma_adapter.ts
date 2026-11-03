@@ -41,8 +41,9 @@ export function PrismaAdapter(p: PrismaClient): Adapter {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     linkAccount: (data) => p.account.create({ data: data as any }) as any,
 
-    unlinkAccount: ({ provider, providerAccountId }) =>
-      p.account.deleteMany({ where: { provider, providerAccountId } }),
+    unlinkAccount: async ({ provider, providerAccountId }) => {
+      await p.account.deleteMany({ where: { provider, providerAccountId } })
+    },
 
     async getSessionAndUser(sessionToken) {
       const userAndSession = await p.session.findUnique({
@@ -62,8 +63,9 @@ export function PrismaAdapter(p: PrismaClient): Adapter {
     deleteSession: (sessionToken) =>
       p.session.delete({ where: { sessionToken } }),
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async createVerificationToken(data) {
-      const verificationToken = await p.verificationToken.create({ data: stripUndefined(data) })
+      const verificationToken = await p.verificationToken.create({ data: data as any })
       if ('id' in verificationToken) {
         const { id: _, ...rest } = verificationToken as typeof verificationToken & { id: string }
         return rest

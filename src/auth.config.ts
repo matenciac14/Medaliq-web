@@ -3,7 +3,7 @@ import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import { mapUserToToken, mapTokenToSession } from '@/lib/auth/session_mappers'
 
-// Config sin Prisma — compatible con Edge Runtime (middleware)
+// Config sin Prisma — usada por proxy.ts (Node.js runtime desde Next.js 16)
 // Los mapeos JWT↔Session vienen de session_mappers.ts (single source of truth)
 export const authConfig: NextAuthConfig = {
   session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
