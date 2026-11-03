@@ -203,8 +203,8 @@ export const GROUPS: RoadmapGroup[] = [
       { title: 'DEBT-03 — Timezone: eliminar hardcodes America/Bogota y usar user.timezone', done: false, priority: 'P1', note: 'HIGH: /api/athlete/nutrition/planned-summary/route.ts:21 hardcodea tz = "America/Bogota" — debe leer user.timezone. MEDIUM: /api/cron/checkin-reminder/route.ts:16,21 usa offset COT fijo — debe usar date_utils con tz del usuario. LOW: 4 archivos con ?? "America/Bogota" fallback (correcto pero revisar). Schema documenta null = America/Bogota. Mobile envía X-Timezone en GETs.' },
 
       // ── STANDBY — activar con primeros usuarios reales ───────────────────────
-      { title: 'Google OAuth: activar con dominio real en producción', done: false, note: '[STANDBY] Google Cloud Console → Client ID + Secret → GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET en Vercel. Código implementado.' },
-      { title: 'Sentry: monitoreo de errores en producción', done: false, note: '[STANDBY] Pospuesto hasta tener usuarios reales activos. @sentry/nextjs. Gratis hasta 5k errores/mes.' },
+      { title: 'Google OAuth: activar con dominio real en producción', done: true, note: 'DONE (2026-11-02). Google Cloud project "Medaliq" creado. Consent screen External (Testing). Credenciales en .env + Vercel. Custom PrismaAdapter para Prisma 7. Publicar consent screen cuando listo para producción.' },
+      { title: 'Sentry: monitoreo de errores en producción', done: true, note: 'DONE (2026-11-02). @sentry/nextjs v11 — client/server/edge. DSN + AUTH_TOKEN + source maps en Vercel prod. Plan Developer gratis (5K errors/mes).' },
       { title: 'Uptime Robot: alertas de disponibilidad (ping cada 5 min)', done: false, note: 'Email/SMS si la app cae. Gratis hasta 50 monitores.' },
     ],
   },
@@ -3638,7 +3638,7 @@ export const GROUPS: RoadmapGroup[] = [
           { title: 'INFRA-01 — Neon pgbouncer (connection pooling serverless-safe)', done: false, priority: 'P2', note: 'Prerequisito: PERF-03. Cambiar DATABASE_URL a Neon Pro con pgbouncer en modo transaction. Costo: $69/mes. Activar cuando usuarios concurrentes superen 200.' },
           { title: 'INFRA-02 — Upstash Pro (rate limiting persistente multi-instancia)', done: false, priority: 'P2', note: 'Prerequisito: PERF-04. Upgrade a Upstash Pro para persistencia entre instancias Vercel y límite de 100k+ req/día. Costo: ~$25/mes.' },
           { title: 'INFRA-03 — Redis cache para endpoints de alta frecuencia', done: false, priority: 'P2', note: 'Prerequisito: PERF-05. Upstash Redis o Vercel KV para cachear respuestas de /api/mobile/dashboard, /api/mobile/gym/week, /api/mobile/plan. TTL 60-300s según endpoint. Costo: ~$15/mes.' },
-          { title: 'INFRA-04 — Vercel Analytics + error monitoring (Sentry)', done: false, priority: 'P3', note: 'Sin observabilidad actual. Vercel Analytics gratuito para métricas de performance. Sentry ~$26/mes para error tracking. Activar antes de lanzamiento público.' },
+          { title: 'INFRA-04 — Vercel Analytics + error monitoring (Sentry)', done: false, priority: 'P3', note: 'Sentry DONE (2026-11-02, plan Developer gratis). Falta: Vercel Analytics (gratuito) para métricas de performance web vitals.' },
           { title: 'INFRA-05 — CDN para GIFs de ejercicios (WorkoutX CDN)', done: false, priority: 'P3', note: 'GIFs de ejercicios (gifUrl de WorkoutX) se sirven desde CDN externo sin control. Evaluar mirror en Cloudflare R2 (~$0.015/GB/mes) si el CDN de WorkoutX presenta latencia en LatAm.' },
           { title: 'INFRA-06 — PostgreSQL local para desarrollo (no tocar Neon en dev)', done: false, priority: 'P1', note: 'brew install postgresql@17 + uncomment DATABASE_URL local en .env. Dev local usa PG local, Neon solo producción. Evita consumir compute hours de Neon en desarrollo.' },
         ],
