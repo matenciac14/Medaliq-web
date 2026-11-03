@@ -1,11 +1,13 @@
 import NextAuth from 'next-auth'
 import { authConfig } from '@/auth.config'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 const { auth } = NextAuth(authConfig)
 
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/set-password', '/forgot-password', '/terminos', '/privacidad']
 
+// Auth.js auth() wrapper returns a function compatible with proxy convention
 export default auth((req) => {
   const { nextUrl, auth: session } = req
   const isLoggedIn = !!session?.user?.id
@@ -45,7 +47,6 @@ export default auth((req) => {
     const status = session.user.status ?? 'ACTIVE'
     const activated = session.user.activated ?? false
     const isB2B = session.user.isB2B ?? false
-    const userPlan = session.user.userPlan ?? 'FREE'
     const needsRoleSelection = session.user.needsRoleSelection ?? false
 
     // Cuenta suspendida o bloqueada por admin — bloquear acceso total (excepto API y rutas públicas)
