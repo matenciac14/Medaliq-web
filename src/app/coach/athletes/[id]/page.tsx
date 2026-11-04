@@ -118,7 +118,7 @@ export default async function AthleteDetailPage({
           id: true,
           template: {
             select: {
-              name: true, goal: true, daysPerWeek: true,
+              id: true, name: true, goal: true, daysPerWeek: true,
               days: {
                 orderBy: { order: 'asc' },
                 select: {
@@ -290,6 +290,7 @@ export default async function AthleteDetailPage({
 
   const gymRoutineData = activeGymRoutine
     ? {
+        templateId: activeGymRoutine.template.id ?? '',
         name: activeGymRoutine.template.name,
         goal: activeGymRoutine.template.goal,
         daysPerWeek: activeGymRoutine.template.daysPerWeek,

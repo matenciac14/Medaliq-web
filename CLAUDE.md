@@ -80,18 +80,31 @@ Para tareas especializadas, invocar el agente correcto:
 
 Invocar: abrir nueva terminal → `claude` → `"Eres @dev. Lee agents/@dev.md. Tu tarea: <descripcion>"`
 
-## Forge — pipeline de desarrollo
+## Slash commands — Skills invocables
 
-Usar para cualquier feature que no sea un fix de 1 archivo:
+| Comando | Que hace |
+|---------|----------|
+| `/forge` | Orquestador — decide carril y ejecuta el pipeline completo |
+| `/survey` | Fase 1: captura contexto, decide carril, mapea scope |
+| `/build` | Fase 2: implementacion en orden DB→domain→infra→API→UI→tests |
+| `/inspect` | Fase 3: auditoria post-build (seguridad, traps, build, mirror) |
+| `/seal` | Fase 4: cierre (roadmap, spec, domain, memoria, commit, PR) |
+| `/review` | Code review de cambios actuales (git diff) — pre-PR |
+| `/verify` | QC station: tsc + vitest + build + coverage |
+| `/wrap` | Cierre de sesion + actualizacion de memoria |
 
-| Fase | Archivo | Qué hace |
-|------|---------|---------|
-| 1 — Survey | `agents/forge-survey.md` | Mapea scope, lee specs y traps, define carril |
-| 2 — Build | `agents/forge-build.md` | Implementa en orden: DB → domain → infra → API → UI → mobile → tests |
-| 3 — Inspect | `agents/forge-inspect.md` | Audita seguridad, traps, build, mirror mobile |
-| 4 — Seal | `agents/forge-seal.md` | Roadmap + spec + domain doc + tests + memoria + PR |
+**Uso**: escribir el comando directamente en el input (ej: `/forge implementar feature X`).
 
-Arrancar con: `"Lee agents/forge-survey.md. La tarea es: <descripcion>"`
+## Forge — pipeline de desarrollo (referencia)
+
+Protocolos detallados en `agents/forge-*.md`. Los slash commands arriba son la forma preferida de invocar Forge.
+
+| Fase | Protocolo | Slash command |
+|------|-----------|---------------|
+| 1 — Survey | `agents/forge-survey.md` | `/survey` |
+| 2 — Build | `agents/forge-build.md` | `/build` |
+| 3 — Inspect | `agents/forge-inspect.md` | `/inspect` |
+| 4 — Seal | `agents/forge-seal.md` | `/seal` |
 
 ---
 
@@ -165,14 +178,12 @@ Anti-patrones: no reportar como bug algo en traps, no "estandarizar" codigo inte
 
 ## /wrap — Reflex de cierre de sesion
 
-Correr SIEMPRE al terminar una sesion de trabajo (no abrir sesion nueva — el contexto ya esta cargado).
+Correr SIEMPRE al terminar una sesion de trabajo.
 
-1. Actualizar `.claude/memory/session.md`:
-   - `## Ultima actualizacion` → fecha de hoy
-   - `## Lo que se hizo en esta sesion` → lista de lo que se implemento/corrigio
-   - `## Proxima sesion` → proximos pasos concretos
-2. Si hubo patron nuevo o trap descubierto → agregar a `.claude/memory/discoveries.md`
-3. Si cambio arquitectura o decision tecnica → actualizar `.claude/memory/architecture.md`
+1. Actualizar auto-memory MEMORY.md (se carga automaticamente en proxima sesion)
+2. Si nueva decision tecnica → `.claude/memory/architecture.md`
+3. Si nuevo trap/patron → `.claude/memory/discoveries.md`
+4. **NO duplicar** — si ya esta en CLAUDE.md, architecture.md, o discoveries.md, no repetirlo en MEMORY.md
 
 ---
 

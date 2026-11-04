@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"$CLAUDE_USER_PROMPT\" | grep -qiE '(feature|add|crea|implem|agreg|build|nueva|modif|cambi|arregl|fix|quiero|necesit|hacer|agrega)' && echo '[FORGE] >1 archivo → crea FTD en contexts/ antes del primer Edit. Nueva abstracción/DB → lee forge-survey.md primero.' || true"
+            "command": "echo \"$CLAUDE_USER_PROMPT\" | grep -qiE '(feature|add|crea|implem|agreg|build|nueva|modif|cambi|arregl|fix|quiero|necesit|hacer|agrega)' && echo '[FORGE] Responde las 4 preguntas antes de codear: (1) Que puede hacer el usuario? (2) Que resultado obtiene? (3) Que debe respetar? (4) Como se demuestra? — Si >1 archivo: crea FTD en contexts/. Si nueva abstraccion/DB: corre /survey primero.' || true"
           }
         ]
       }

@@ -150,6 +150,7 @@ export type GymRoutineDayData = {
 }
 
 export type GymRoutineData = {
+  templateId: string
   name: string
   goal: string | null
   daysPerWeek: number

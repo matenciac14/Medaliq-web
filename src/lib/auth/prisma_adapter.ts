@@ -17,8 +17,9 @@ function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
 export function PrismaAdapter(p: PrismaClient): Adapter {
   return {
     createUser: ({ id: _id, ...data }) =>
+      // OAuth users (Google) need role selection — Credentials provider never calls createUser
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      p.user.create({ data: stripUndefined(data) as any }),
+      p.user.create({ data: { ...stripUndefined(data), needsRoleSelection: true } as any }),
 
     getUser: (id) => p.user.findUnique({ where: { id } }),
 
