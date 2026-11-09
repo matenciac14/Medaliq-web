@@ -151,6 +151,10 @@ model User {
   // Referidos coach→coach
   coachReferralsSent     CoachReferral[] @relation("CoachReferralsSent")
   coachReferralsReceived CoachReferral[] @relation("CoachReferralsReceived")
+
+  // Rest timer config (RET-02)
+  exerciseRestConfigs ExerciseRestConfig[]
+  restTimerDefaults   RestTimerDefaults?
 }
 
 enum UserRole {
@@ -1527,4 +1531,30 @@ model TierFeatureConfig {
   featureGym       Boolean         @default(true)
   updatedAt        DateTime        @updatedAt
   updatedBy        String?         // admin userId que hizo el último cambio
+}
+
+// ─── REST TIMER CONFIG (RET-02) ──────────────────────────────────────────────
+
+model ExerciseRestConfig {
+  id                 String @id @default(cuid())
+  userId             String
+  exerciseId         String
+  defaultRestSeconds Int    // 15-600
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseId])
+  @@index([userId])
+}
+
+model RestTimerDefaults {
+  id                      String  @id @default(cuid())
+  userId                  String  @unique
+  autoStart               Boolean @default(true)
+  soundEnabled            Boolean @default(true)
+  vibrationEnabled        Boolean @default(true)
+  defaultCompoundSeconds  Int     @default(120)
+  defaultIsolationSeconds Int     @default(60)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

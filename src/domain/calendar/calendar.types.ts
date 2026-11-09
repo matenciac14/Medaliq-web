@@ -46,6 +46,7 @@ export type CalendarDay = {
     durationMin: number | null
     distanceKm: number | null
     rpe: number | null
+    dataSource: string | null  // 'MANUAL' | 'STRAVA' | 'HEALTHKIT' | null
   } | null
 }
 

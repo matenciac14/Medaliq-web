@@ -20,7 +20,7 @@ Revisión completa de las 27 specs y 12 domain docs reveló 4 "completions" que 
 
 - **R3**: `syncWeight` solo guarda `HealthProfile.weightKg`. NO recalcula TDEE ni propaga. El agente que vea esto tenderá a "completar" la función — no hacerlo.
 - **R4**: `applySessionAdjustments` fue removido del flujo de check-in. Existe solo para el endpoint de "accept suggestion". No está "faltando" en el flujo principal.
-- **R5**: `intensityToDayType(intensity)` existe en utils pero ningún consumidor la usa — todos hardcodean `MODERATE`. Diseño intencional: el target de nutrición es fijo independiente de la sesión.
+- **R5**: `intensityToDayType(intensity)` en utils NO se usa directamente. PERO `getDailyNutritionTarget(intensity, nutritionPlan)` en `domain/nutrition/daily_target.ts` SÍ se llama desde `get_dashboard_summary.use_case.ts` (líneas 260-263) y ajusta kcal por intensidad (HIGH→targetKcalHard, MODERATE→targetKcalEasy, REST→targetKcalRest). El hardcode MODERATE aplica solo cuando `todaySession` es gym/FUERZA sin plan — sesiones de plan de running SÍ usan intensidad real.
 - **R6**: `PendingNutritionAdjustment` eliminado de código y schema. Cualquier endpoint que antes lo usaba ahora retorna `pendingAdjustment: null` hardcoded.
 
 ### Sistema en producción — estado no obvio (2026-10-29)
