@@ -11,6 +11,7 @@ import {
   buildWaterData,
 } from '@/infrastructure/db/dashboard_queries'
 import { handlePlanLifecycle } from '@/infrastructure/db/shared_athlete_data'
+import { computeEnergyBalance, type EnergyBalanceResult } from '@/domain/dashboard/energy_balance.use_case'
 import type { CalendarWeek } from '@/domain/calendar/calendar.types'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -152,6 +153,9 @@ export type DashboardData = {
 
   // Server-computed today DOW (1=Mon…7=Sun) for client timezone accuracy
   todayDow: number
+
+  // Energy balance (daily budget vs consumed)
+  energyBalance: EnergyBalanceResult | null
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -488,6 +492,52 @@ export async function getDashboardData(userId: string, rawWeekOffset: number, se
   // In TRAINING mode use completedCount so weekSessionCount is never stuck at 0
   const weekSessionCount = activePlan ? completedCount : weekSessionCountFree
 
+  // ── Energy balance (reuses already-fetched core data — no extra DB hit) ───
+  const ebTdee = nutritionPlan?.tdee ?? 0
+  const ebFoodTotals = computeFoodTotals(todayFoodLogs)
+  // Estimate exercise calories from todaySession using MET table
+  const ebExerciseKcal = (() => {
+    if (!todaySession?.completed || !todaySession.durationMin) return 0
+    const MET: Record<string, number> = {
+      FUERZA: 5.0, RODAJE_Z2: 8.0, TEMPO: 10.0, INTERVALOS: 12.0,
+      FARTLEK: 10.0, TIRADA_LARGA: 8.5, NATACION: 8.0, CICLA: 7.5, OTRO: 5.0,
+    }
+    const wKg = (dbUser.profile as unknown as { weightKg?: number } | null)?.weightKg ?? 70
+    const met = todaySession.type ? (MET[todaySession.type] ?? 5.0) : 5.0
+    return Math.round(met * wKg * (todaySession.durationMin / 60))
+  })()
+  type CheckInRecord = { weightKg: number | null; recordedAt: Date }
+  const checkInsWithWeight = (dbUser.checkIns as CheckInRecord[]).filter(c => c.weightKg !== null)
+  const energyBalance: EnergyBalanceResult | null = ebTdee > 0
+    ? computeEnergyBalance({
+        tdee: ebTdee,
+        nutritionPlan: nutritionPlan ? {
+          targetKcalHard: nutritionPlan.targetKcalHard,
+          targetKcalEasy: nutritionPlan.targetKcalEasy,
+          targetKcalRest: nutritionPlan.targetKcalRest,
+          proteinG:       nutritionPlan.proteinG,
+          carbsHardG:     nutritionPlan.carbsHardG,
+          carbsEasyG:     nutritionPlan.carbsEasyG,
+          fatG:           nutritionPlan.fatG,
+        } : null,
+        foodTotals: ebFoodTotals,
+        exerciseCalories: ebExerciseKcal,
+        todaySession: todaySession
+          ? { completed: todaySession.completed, type: todaySession.type, durationMin: todaySession.durationMin, caloriesBurned: null }
+          : null,
+        intensity: null,
+        water: {
+          mlLogged: todayWaterLog?.mlLogged ?? 0,
+          mlTarget: nutritionPlan?.waterMlTarget ?? 2000,
+        },
+        weights: {
+          current:  checkInsWithWeight[0]?.weightKg ?? null,
+          previous: checkInsWithWeight[1]?.weightKg ?? null,
+        },
+        date: todayStr,
+      })
+    : null
+
   return {
     dashboardMode,
     firstName,
@@ -583,5 +633,7 @@ export async function getDashboardData(userId: string, rawWeekOffset: number, se
     trialDaysLeft,
 
     todayDow,
+
+    energyBalance,
   }
 }

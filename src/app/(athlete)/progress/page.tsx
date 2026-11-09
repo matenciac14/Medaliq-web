@@ -2,6 +2,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import { getISOWeekNumber } from '@/lib/core/week_number'
 import { calcAdherencePct } from '@/lib/core/adherence'
+import { getRunningPrs } from '@/domain/running/running_prs.use_case'
 import ProgressClient, {
   type WeightPoint,
   type HrPoint,
@@ -16,6 +17,7 @@ import ProgressClient, {
   type DailyWeightPoint,
   type NutritionAdherencePoint,
   type GymPRHistorySeries,
+  type RunningPr,
 } from './_components/ProgressClient'
 
 
@@ -103,7 +105,7 @@ export default async function ProgressPage() {
 
   const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-  const [profile, gymSessionsCount, rawBenchmarks, rawGymPRs, rawSessionLogs, rawGymSessions, rawDailyWeights, nutritionPlanProg, foodLogs30d, rawSetHistory] = await Promise.all([
+  const [profile, gymSessionsCount, rawBenchmarks, rawGymPRs, rawSessionLogs, rawGymSessions, rawDailyWeights, nutritionPlanProg, foodLogs30d, rawSetHistory, runningPrs] = await Promise.all([
     prisma.healthProfile.findUnique({
       where: { userId: session.user.id },
       select: { weightGoalKg: true },
@@ -191,6 +193,7 @@ export default async function ProgressPage() {
         },
       },
     }),
+    getRunningPrs(session.user.id),
   ])
 
   const weightGoal = profile?.weightGoalKg ?? null
@@ -449,6 +452,14 @@ export default async function ProgressPage() {
       total: daysPerWeek > 0 ? daysPerWeek : globalDpw,
     }))
 
+  const runningPrsMapped: RunningPr[] = runningPrs.map(pr => ({
+    distance: pr.distance,
+    bestPaceFormatted: pr.bestPaceFormatted,
+    bestTimeFormatted: pr.bestTimeFormatted,
+    achievedAt: pr.achievedAt,
+    source: pr.source,
+  }))
+
   return (
     <ProgressClient
       weightCheckins={weightCheckins}
@@ -466,6 +477,7 @@ export default async function ProgressPage() {
       dailyWeightPoints={dailyWeightPoints}
       nutritionAdherence={nutritionAdherence}
       nutritionTargetKcal={nutritionTargetKcal}
+      runningPrs={runningPrsMapped}
     />
   )
 }
