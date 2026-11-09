@@ -200,7 +200,7 @@ export const GROUPS: RoadmapGroup[] = [
       // ── DEUDA TÉCNICA — mejoras graduales sin urgencia ─────────────────────────
       { title: 'DEBT-01 — Reemplazar .catch(() => {}) fire-and-forget con logging (38 instancias)', done: true, priority: 'P2', note: 'DONE (2026-10-02). 28 instancias tipo A (push/email/notification fire-and-forget) reemplazadas con .catch((err) => console.error("[modulo] operación failed:", err)). 4 tipo B reportadas sin cambiar: auth.ts:155 (P2002 silenciado en userSubscription.create concurrent), generate_plan.use_case.ts:286 (hrMax update silenciado), y 6 instancias en roadmap_data.ts que son strings en comentarios/notas, no código ejecutable.' },
       { title: 'DEBT-02 — Rate limiting en 4 endpoints coach sin protección', done: true, priority: 'P1', note: 'Verificado 2026-10-30: todos los endpoints ya tienen rateLimitAsync(). clients/create: 30/min, admin/search: 60/min, coach/posts GET: 300/min POST: 60/min, coach/gym/exercises GET: 300/min POST: 60/min.' },
-      { title: 'DEBT-03 — Timezone: eliminar hardcodes America/Bogota y usar user.timezone', done: false, priority: 'P1', note: 'HIGH: /api/athlete/nutrition/planned-summary/route.ts:21 hardcodea tz = "America/Bogota" — debe leer user.timezone. MEDIUM: /api/cron/checkin-reminder/route.ts:16,21 usa offset COT fijo — debe usar date_utils con tz del usuario. LOW: 4 archivos con ?? "America/Bogota" fallback (correcto pero revisar). Schema documenta null = America/Bogota. Mobile envía X-Timezone en GETs.' },
+      { title: 'DEBT-03 — Timezone: eliminar hardcodes America/Bogota y usar user.timezone', done: true, priority: 'P1', note: 'DONE (2026-11-02). PR #107 mergeado. 5 archivos corregidos: hardcodes eliminados, fallback unificado a UTC. Mobile envía X-Timezone en GETs.' },
 
       // ── STANDBY — activar con primeros usuarios reales ───────────────────────
       { title: 'Google OAuth: activar con dominio real en producción', done: true, note: 'DONE (2026-11-02). Google Cloud project "Medaliq" creado. Consent screen External (Testing). Credenciales en .env + Vercel. Custom PrismaAdapter para Prisma 7. Publicar consent screen cuando listo para producción.' },
@@ -4020,6 +4020,71 @@ export const GROUPS: RoadmapGroup[] = [
         done: false,
         priority: 'P2',
         note: 'IMPACTO: alto — diferenciador visual premium. Ya tenemos MuscleMap SVG propio en mobile (GYM-S2-02) y web (GYM-WEB-01) con datos de targetMuscles/secondaryMuscles en DB. Este item evalúa reemplazar/complementar los SVGs propios con la Muscle Visualizer API de AscendAPI ($30/mes Pro, 10K req/mes) para diagramas anatómicos HD con heatmaps, workout activation (primario vs secundario con 2 colores), y modelos male/female. Estrategia: (1) sync inicial — generar imágenes para los ~50 targetMuscles × 2 géneros × 2 vistas (front/back) = ~200 imágenes, cachear en nuestro CDN (Cloudflare R2 o similar). (2) Integrar en: vista de ejercicio individual, resumen post-sesión ("músculos trabajados hoy"), cobertura semanal del coach, sugerencias de gaps musculares. (3) Costo temporal: $30/mes durante sync, luego bajar a free o cancelar (imágenes ya cacheadas). Endpoints: GET /v1/visualize/workout (activation), GET /v1/visualize/heatmap (cobertura), GET /v1/visualize/muscles (highlighting), GET /v1/muscles (lista). Auth: RapidAPI headers. ANTES DE IMPLEMENTAR: evaluar alternativas competitivas con mismo funcionamiento — musclewiki.com API, SVGs open-source (e.g. musclesapi.com, body-chart libs en npm), o generación propia con AI (imagen base + overlay por músculo). Comparar: calidad visual, costo, licencia, cacheo, mantenimiento.',
+      },
+    ],
+  },
+
+  // ─── RETENCIÓN HUB — Features de retención diaria ──────────────────────────
+  // Identificados en análisis de gaps usuario 2026-11-08.
+  // Filosofía: Medaliq como hub unificado + interactivo. No competir con apps especializadas.
+  // Ordenados por impacto en retención × esfuerzo de implementación.
+
+  {
+    id: 'retention-hub',
+    label: 'Retención Hub — Experiencia Diaria Unificada',
+    color: '#7c3aed',
+    bgColor: '#f5f3ff',
+    borderColor: '#c4b5fd',
+    phases: [
+      {
+        id: 'retention-fase1',
+        label: 'Fase 1 — Dashboard unificado + Timer',
+        period: 'Sprint 1-2',
+        items: [
+          {
+            title: 'RET-01 — Dashboard "Mi Día" unificado: balance energético (TDEE + ejercicio - consumo)',
+            done: false,
+            priority: 'P0',
+            note: 'IMPACTO: alto — conecta los dos pilares (entrenamiento + nutricion) en una vista. Datos ya existen en modulos separados. Spec: energy_balance.spec.md. Backend: 2 endpoints web+mobile (GET energy-balance) + 1 semanal. Reutiliza getDailyNutritionTarget, computeFoodTotals, HealthProfile.tdee. Tabla MET para estimar calorias cuando no hay wearable. Mobile: anillo de calorias + barras macros + peso con tendencia. Web: componente en dashboard existente. Esfuerzo: bajo-medio (datos existen, solo falta JOIN visual).',
+          },
+          {
+            title: 'RET-02 — Timer interactivo de descanso entre series (mobile-native)',
+            done: false,
+            priority: 'P0',
+            note: 'IMPACTO: altisimo — retiene al usuario DENTRO de la app durante toda la sesion (45-90 min). Spec: rest_timer.spec.md. Timer 100% client-side (mobile). Backend: 3 endpoints web + 3 mobile para persistir config (defaultRestSeconds por ejercicio, autoStart, sound). Mobile: RestTimerOverlay con countdown circular, +30s/-30s, preview siguiente serie, vibracion/sonido al expirar, expo-notifications para background. Modelos nuevos: ExerciseRestConfig (userId+exerciseId), RestTimerDefaults. Defaults: compound 120s, isolation 60s (usa Exercise.mechanic). Cardio sin timer.',
+          },
+          {
+            title: 'RET-03 — Resumen post-sesion con stats + share card',
+            done: false,
+            priority: 'P1',
+            note: 'IMPACTO: alto — cierre de sesion con sensacion de logro + viralidad. Spec: session_summary.spec.md. Backend: 2 endpoints mobile + 1 web (GET session/[id]/summary). Calcula: volumen total (kg*reps), musculos trabajados, PRs nuevos (lee isPR de SetLog, no re-detecta), calorias estimadas. Running: distancia, pace formateado. Share card generada client-side (canvas/SVG). No requiere modelos nuevos — lectura de SessionLog, GymSession, SetLog.',
+          },
+        ],
+      },
+      {
+        id: 'retention-fase2',
+        label: 'Fase 2 — Strava Hub + Notificaciones',
+        period: 'Sprint 3-4',
+        items: [
+          {
+            title: 'RET-04 — Activar Strava sync + PRs de running + calendario unificado',
+            done: false,
+            priority: 'P0',
+            note: 'IMPACTO: alto — captura usuarios gym+running sin competir con Strava. Spec: strava_activation.spec.md. Backend Strava 100% implementado (STRA-01 a STRA-10). Solo falta: (1) env vars en Vercel (ops, no codigo), (2) 2 endpoints nuevos GET running/prs (web+mobile) con buckets 1K/5K/10K/21K/42K, (3) agregar dataSource al freeRun slot de buildCalendarWeek. PRs de running = mejor pace por distancia (cross-source: manual + Strava + HealthKit). Extiende MVP-01 existente.',
+          },
+          {
+            title: 'RET-05 — Weekly recap: push notification dominical con resumen semanal',
+            done: false,
+            priority: 'P1',
+            note: 'IMPACTO: medio-alto — drive de habito semanal. Spec: weekly_recap.spec.md. Cron POST /api/cron/weekly-recap (domingo 21:00 UTC). Solo atletas con >= 1 actividad en la semana. createNotification con tipo WEEKLY_RECAP + metadata JSON. Endpoint GET /api/mobile/recap/weekly con metricas + comparacion vs semana anterior. Paginado con cursor (batch 100). No requiere modelos nuevos.',
+          },
+          {
+            title: 'RET-06 — Smart notifications: push pre-sesion con contexto del ultimo entrenamiento',
+            done: false,
+            priority: 'P1',
+            note: 'IMPACTO: medio — prepara al atleta y lo motiva a entrenar. Spec: smart_notifications.spec.md. Cron POST /api/cron/smart-session-notify (cada hora 6-20 UTC, filtra por timezone). Push EFIMERO (sendPushNotification directo, sin registro DB). Contexto: "Hoy toca Piernas — tu ultimo squat fue 100kg x 8. Listo?". Busca PlannedSession o WorkoutDay del dia + historial reciente del mismo tipo. Dedup con cache key Redis TTL 24h.',
+          },
+        ],
       },
     ],
   },
