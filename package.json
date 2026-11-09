@@ -17,7 +17,9 @@
     "e2e:ui": "playwright test --ui",
     "e2e:debug": "playwright test --debug",
     "e2e:report": "playwright show-report",
-    "e2e:critical": "playwright test --grep @critical"
+    "e2e:critical": "playwright test --grep @critical",
+    "e2e:retention": "playwright test --grep @retention",
+    "e2e:stress": "playwright test --grep @stress"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
