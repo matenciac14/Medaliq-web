@@ -10,6 +10,7 @@ import { ChevronRight, Dumbbell, Calendar, Clock, CheckCircle2, History } from '
 import { resolveExerciseGifUrl } from '@/lib/gym/gif_url'
 import PublicTemplates from './_components/PublicTemplates'
 import FeaturedExercisesGrid from './_components/FeaturedExercisesGrid'
+import GymCompletionModal from './_components/GymCompletionModal'
 import WeekNavBar from '../_components/WeekNavBar'
 import MuscleMapWeb from '@/components/MuscleMapWeb'
 import type { MuscleData } from '@/components/MuscleMapWeb'
@@ -23,13 +24,14 @@ function formatDate(date: Date) {
 }
 
 
-export default async function GymPage({ searchParams }: { searchParams: Promise<{ completed?: string; weekOffset?: string; selectedDow?: string }> }) {
+export default async function GymPage({ searchParams }: { searchParams: Promise<{ completed?: string; sid?: string; weekOffset?: string; selectedDow?: string }> }) {
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
   const athleteId = session.user.id
-  const { completed: completedParam, weekOffset: weekOffsetParam, selectedDow: selectedDowParam } = await searchParams
+  const { completed: completedParam, sid: sidParam, weekOffset: weekOffsetParam, selectedDow: selectedDowParam } = await searchParams
   const justCompleted = completedParam === '1'
+  const summarySessionId = justCompleted && sidParam ? sidParam : null
   const weekOffset = Math.max(-52, Math.min(52, parseInt(weekOffsetParam ?? '0') || 0))
   const isCurrentWeek = weekOffset === 0
   const selectedDow = parseInt(selectedDowParam ?? '0') || 0
@@ -172,6 +174,8 @@ export default async function GymPage({ searchParams }: { searchParams: Promise<
 
     return (
       <div className="px-4 py-6 md:px-8 md:py-8 max-w-7xl mx-auto space-y-6">
+
+        {summarySessionId && <GymCompletionModal sessionId={summarySessionId} />}
 
         {/* ── HEADER ───────────────────────────────────────────── */}
         {coachRelation ? (
@@ -411,6 +415,8 @@ export default async function GymPage({ searchParams }: { searchParams: Promise<
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8 max-w-7xl mx-auto space-y-6">
+
+      {summarySessionId && <GymCompletionModal sessionId={summarySessionId} />}
 
       {/* Banner post-sesión — full width */}
       {justCompleted && lastSession && (

@@ -100,6 +100,7 @@ export async function buildCalendarWeek(userId: string, weekOffset: number, time
         durationMin: true,
         distanceKm: true,
         rpe: true,
+        dataSource: true,
       },
     }),
   ])
@@ -205,6 +206,7 @@ export async function buildCalendarWeek(userId: string, weekOffset: number, time
             durationMin: freeRun.durationMin ?? null,
             distanceKm: freeRun.distanceKm ?? null,
             rpe: freeRun.rpe ?? null,
+            dataSource: freeRun.dataSource ?? null,
           }
         : null,
     })

@@ -615,11 +615,12 @@ export default function GymSessionPage() {
       if (!res.ok) throw new Error('Error guardando sesión')
 
       const data = await res.json()
+      const sid = data.sessionId ?? ''
       if (data.newPRs?.length > 0) {
         setNewPRs(data.newPRs)
-        setTimeout(() => router.push('/gym?completed=1'), 3000)
+        setTimeout(() => router.push(`/gym?completed=1&sid=${sid}`), 3000)
       } else {
-        router.push('/gym?completed=1')
+        router.push(`/gym?completed=1&sid=${sid}`)
       }
     } catch {
       setSubmitting(false)

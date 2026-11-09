@@ -15,6 +15,7 @@ import MobileCardsSection from './_components/MobileCardsSection'
 import DesktopRecentActivity from './_components/DesktopRecentActivity'
 import MealSlotsWidget from './_components/MealSlotsWidget'
 import HydrationWidget from '../nutrition/_components/HydrationWidget'
+import EnergyBalanceCard from './_components/EnergyBalanceCard'
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ weekOffset?: string }> }) {
   const session = await auth()
@@ -233,6 +234,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Desktop: Energy balance card */}
+          {d.energyBalance && (
+            <div className="hidden sm:block">
+              <EnergyBalanceCard data={d.energyBalance} />
             </div>
           )}
 

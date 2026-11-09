@@ -83,6 +83,14 @@ export type NutritionAdherencePoint = {
 export type GymPRHistoryPoint = { date: string; oneRmKg: number }
 export type GymPRHistorySeries = { exerciseName: string; points: GymPRHistoryPoint[] }
 
+export type RunningPr = {
+  distance: string
+  bestPaceFormatted: string | null
+  bestTimeFormatted: string | null
+  achievedAt: string | null
+  source: string | null
+}
+
 export type ProgressClientProps = {
   weightCheckins: WeightPoint[]
   hrCheckins: HrPoint[]
@@ -99,6 +107,7 @@ export type ProgressClientProps = {
   dailyWeightPoints: DailyWeightPoint[]
   nutritionAdherence: NutritionAdherencePoint[]
   nutritionTargetKcal: number
+  runningPrs?: RunningPr[]
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -818,6 +827,7 @@ export default function ProgressClient({
   monthlyActivity,
   dailyWeightPoints,
   nutritionAdherence,
+  runningPrs,
 }: ProgressClientProps) {
   const [period, setPeriod] = useState<Period>(12)
   const [localBenchmarks, setLocalBenchmarks] = useState<BenchmarkPoint[]>(benchmarks)
@@ -1135,6 +1145,92 @@ export default function ProgressClient({
               </div>
             ))}
           </div>
+        </SectionCard>
+      )}
+
+      {/* ── PRs Running ─────────────────────────────────────────────────────── */}
+      {runningPrs && (
+        <SectionCard title="PRs Running">
+          {runningPrs.some(pr => pr.bestPaceFormatted !== null) ? (
+            <>
+              {/* Mobile: cards */}
+              <div className="sm:hidden space-y-2">
+                {runningPrs.map(pr => (
+                  <div key={pr.distance} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 gap-3">
+                    <div>
+                      <p className="text-sm font-bold text-[#1e3a5f]">{pr.distance}</p>
+                      {pr.achievedAt && (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {new Date(pr.achievedAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      {pr.bestPaceFormatted ? (
+                        <p className="text-base font-black text-[#ea580c]">{pr.bestPaceFormatted}</p>
+                      ) : (
+                        <p className="text-sm text-gray-400">—</p>
+                      )}
+                      {pr.bestTimeFormatted && (
+                        <p className="text-xs text-gray-500">{pr.bestTimeFormatted}</p>
+                      )}
+                      {pr.source === 'STRAVA' && (
+                        <span className="text-[10px] font-bold text-[#ea580c]">Strava</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: table */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      {['Distancia', 'Mejor Ritmo', 'Mejor Tiempo', 'Fecha', 'Fuente'].map(h => (
+                        <th key={h} className="text-left py-2 pr-4 last:pr-0 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {runningPrs.map(pr => (
+                      <tr key={pr.distance}>
+                        <td className="py-3 pr-4 font-bold text-[#1e3a5f]">{pr.distance}</td>
+                        <td className="py-3 pr-4 font-black text-[#ea580c]">
+                          {pr.bestPaceFormatted ?? '—'}
+                        </td>
+                        <td className="py-3 pr-4 text-gray-700">
+                          {pr.bestTimeFormatted ?? '—'}
+                        </td>
+                        <td className="py-3 pr-4 text-gray-500">
+                          {pr.achievedAt
+                            ? new Date(pr.achievedAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : '—'}
+                        </td>
+                        <td className="py-3">
+                          {pr.source === 'STRAVA' ? (
+                            <span className="text-xs font-bold text-[#ea580c]">Strava</span>
+                          ) : pr.source === 'HEALTHKIT' ? (
+                            <span className="text-xs font-semibold text-gray-500">Health</span>
+                          ) : pr.source ? (
+                            <span className="text-xs text-gray-400">Manual</span>
+                          ) : (
+                            <span className="text-xs text-gray-300">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-gray-400 text-center py-4">
+              Aun no tienes PRs de running registrados. Completa sesiones de running para ver tus mejores marcas aqui.
+            </p>
+          )}
         </SectionCard>
       )}
 

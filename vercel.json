@@ -1,6 +1,18 @@
 {
   "functions": {
     "src/app/api/onboarding/generate/route.ts": { "maxDuration": 60 },
-    "src/app/api/coach/athlete/[id]/plan/route.ts": { "maxDuration": 60 }
-  }
+    "src/app/api/coach/athlete/[id]/plan/route.ts": { "maxDuration": 60 },
+    "src/app/api/cron/weekly-recap/route.ts": { "maxDuration": 60 },
+    "src/app/api/cron/smart-session-notify/route.ts": { "maxDuration": 60 }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/weekly-recap",
+      "schedule": "0 21 * * 0"
+    },
+    {
+      "path": "/api/cron/smart-session-notify",
+      "schedule": "0 6-20 * * *"
+    }
+  ]
 }

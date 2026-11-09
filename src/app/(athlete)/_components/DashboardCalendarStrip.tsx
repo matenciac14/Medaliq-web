@@ -335,6 +335,11 @@ function SelectedDayDetail({ day, dashboardMode, firstName, completedCount, tota
                   {freeRun!.distanceKm} km
                 </span>
               )}
+              {isFreeRun && freeRun!.dataSource === 'STRAVA' && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-orange-100 text-orange-600">
+                  Strava
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -483,6 +488,11 @@ function MobileSelectedDayCard({ day, isToday }: { day: CalendarDay; isToday: bo
         <p className="text-sm font-semibold text-gray-900">{sessionName}</p>
         {detailText && detailText !== sessionName && (
           <p className="text-xs text-gray-500">{detailText}</p>
+        )}
+        {!isSportPrimary && !isGymPrimary && freeRun?.dataSource === 'STRAVA' && (
+          <span className="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded bg-orange-100 text-orange-600 mt-0.5">
+            Strava
+          </span>
         )}
         <div className="pt-2">
           {done ? (
