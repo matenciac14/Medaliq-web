@@ -10,6 +10,8 @@ import { defineConfig, devices } from '@playwright/test'
  *   pnpm e2e --grep "@atleta"         → solo tests de atleta
  *   pnpm e2e --grep "@coach"          → solo tests de coach
  *   pnpm e2e --grep "@critical"       → solo P0 críticos
+ *   pnpm e2e --grep "@retention"      → solo tests de retención (RET-01 a RET-06)
+ *   pnpm e2e --grep "@stress"         → solo tests de estrés
  *   pnpm e2e e2e/actor-atleta/checkin.spec.ts → un archivo
  */
 
