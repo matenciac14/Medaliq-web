@@ -128,7 +128,9 @@ export async function getMobileUser(req: NextRequest): Promise<MobileTokenPayloa
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) return null
     const token = authHeader.slice(7)
-    return await verifyMobileToken(token)
+    const payload = await verifyMobileToken(token)
+    if (payload && payload.status !== 'ACTIVE') return null
+    return payload
   } catch (err) {
     console.error('[mobile-auth] Token verification failed:', err)
     return null

@@ -2542,7 +2542,7 @@ export const GROUPS: RoadmapGroup[] = [
             title: 'BACK-01 — Middleware: bloquear usuarios SUSPENDED y BLOCKED',
             done: true,
             priority: 'P0',
-            note: 'User.status incluido en JWT (auth.ts + auth.config.ts). Middleware redirige a /login con mensaje de error si status !== ACTIVE. Mobile login retorna 403 si status !== ACTIVE. MobileTokenPayload incluye status. Todos los signMobileToken actualizados.',
+            note: 'PLT-01 completo: (1) getMobileUser() rechaza status!==ACTIVE con null→401, (2) proxy.ts bloquea API routes con JSON 403 (excepto auth/mobile/webhooks/cron), (3) JWT refresh marca token con error ACCOUNT_SUSPENDED si status!==ACTIVE, propagado a session.error.',
           },
           {
             title: 'BACK-02 — /api/coach/clients/create: bloquear si identification o phoneWa no están completos',

@@ -49,7 +49,7 @@ Commits: `feat:` · `fix:` · `chore:` · `docs:`
 - **Crons**: TODOS desactivados en `vercel.json` — no corren en produccion
 - **`BILLING_ENABLED`**: si no es `'true'` → `getUserPlan()` retorna `'PRO'` para todos (modo beta)
 - **`PlanSource`**: `COACH` es el UNICO valor valido en DB. `SYSTEM` y `TEMPLATE` son dead code.
-- **`UserStatus` enforcement**: NO activo (PLT-01 pendiente)
+- **`UserStatus` enforcement**: activo — mobile guard, API 403, JWT refresh check (PLT-01 done)
 - **`/coaches` directory**: oculto hasta 20+ coaches activos
 
 ### Modelos deprecados (NO usar en codigo nuevo)

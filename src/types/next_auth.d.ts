@@ -2,6 +2,7 @@ import 'next-auth'
 
 declare module 'next-auth' {
   interface Session {
+    error?: string
     user: {
       id: string
       role: string
@@ -55,6 +56,7 @@ declare module 'next-auth/jwt' {
     id?: string
     role?: string
     status?: 'ACTIVE' | 'SUSPENDED' | 'BLOCKED' | 'DELETED'
+    error?: string
     onboardingCompleted?: boolean
     activated?: boolean
     isB2B?: boolean
@@ -83,6 +85,7 @@ declare module '@auth/core/jwt' {
     id?: string
     role?: string
     status?: 'ACTIVE' | 'SUSPENDED' | 'BLOCKED' | 'DELETED'
+    error?: string
     onboardingCompleted?: boolean
     activated?: boolean
     isB2B?: boolean
@@ -109,6 +112,7 @@ declare module '@auth/core/jwt.js' {
     id?: string
     role?: string
     status?: 'ACTIVE' | 'SUSPENDED' | 'BLOCKED' | 'DELETED'
+    error?: string
     onboardingCompleted?: boolean
     activated?: boolean
     isB2B?: boolean

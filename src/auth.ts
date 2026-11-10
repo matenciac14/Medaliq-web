@@ -233,6 +233,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             prisma.userSubscription.findUnique({ where: { userId: t.id }, select: { tier: true, trialEndsAt: true } }),
           ])
           if (dbUser) {
+            // PLT-01: Si admin suspendió/bloqueó la cuenta, marcar token con error
+            if (dbUser.status !== 'ACTIVE') {
+              return { ...token, error: 'ACCOUNT_SUSPENDED' }
+            }
+
             const features = buildFeaturesFromUser(dbUser)
             const trialDaysLeft = subscription?.tier === 'TRIAL' && subscription?.trialEndsAt
               ? Math.max(0, Math.ceil((subscription.trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))

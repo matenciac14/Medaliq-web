@@ -39,6 +39,10 @@ export function mapTokenToSession(session: Session, token: JWT): Session {
   session.user.features = token.features ?? DEFAULT_USER_CONFIG.features
   session.user.profileComplete = token.profileComplete ?? false
   session.user.trialDaysLeft = token.trialDaysLeft ?? null
+  // PLT-01: propagar error de cuenta suspendida al client-side
+  if (token.error) {
+    session.error = token.error as string
+  }
   return session
 }
 

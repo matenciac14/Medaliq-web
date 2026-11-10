@@ -49,10 +49,23 @@ export default auth((req) => {
     const isB2B = session.user.isB2B ?? false
     const needsRoleSelection = session.user.needsRoleSelection ?? false
 
-    // Cuenta suspendida o bloqueada por admin — bloquear acceso total (excepto API y rutas públicas)
-    if (status !== 'ACTIVE' && !pathname.startsWith('/api') && !isPublicRoute) {
+    // Cuenta suspendida o bloqueada por admin — bloquear acceso total (excepto rutas públicas y API excluidas)
+    if (status !== 'ACTIVE' && !isPublicRoute) {
       const message = status === 'BLOCKED' ? 'Tu cuenta ha sido bloqueada.' : 'Tu cuenta está suspendida.'
-      return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, nextUrl))
+
+      // API routes: bloquear con JSON 403, excepto auth/mobile/webhooks/cron
+      if (pathname.startsWith('/api/')) {
+        const isExemptApi =
+          pathname.startsWith('/api/auth/') ||
+          pathname.startsWith('/api/mobile/') ||
+          pathname.startsWith('/api/webhooks/') ||
+          pathname.startsWith('/api/cron/')
+        if (!isExemptApi) {
+          return NextResponse.json({ error: 'Cuenta suspendida' }, { status: 403 })
+        }
+      } else {
+        return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, nextUrl))
+      }
     }
 
     // Google OAuth user que no ha seleccionado su rol
